@@ -1,5 +1,6 @@
 #[macro_use] extern crate rocket;
 use mongodb::{options::ClientOptions, sync::Client};
+use mongodb::bson::{doc, Document};
 
 #[get("/hello")]
 fn index() -> &'static str {
@@ -21,14 +22,26 @@ fn rocket() -> Result<rocket::Rocket<rocket::Build>, mongodb::error::Error> {
     //     }
     // };
 
-    let client_options = ClientOptions::parse(
+    let mut client_options = ClientOptions::parse(
         "mongodb+srv://myUser:myPassword@mycluster.zvnqo.mongodb.net/MyCluster?retryWrites=true&w=majority",
     )?;
     let client = Client::with_options(client_options)?;
     for db_name in client.list_database_names(None, None)? {
         println!("{}", db_name);
     }
-    // let database = client.database("Connect4DB");
+    println!("");
+    let database = client.database("Connect4DB");
+    for collection_name in database.list_collection_names(None)? {
+        println!("{}", collection_name);
+    }
+    let collection = database.collection::<Document>("test");
+    println!("");
+    let docs = vec![
+        doc! { "title": "1984", "author": "George Orwell" },
+        doc! { "title": "Animal Farm", "author": "George Orwell" },
+        doc! { "title": "The Great Gatsby", "author": "F. Scott Fitzgerald" },
+    ];
+    collection.insert_many(docs, None)?;
     Ok(rocket::build().mount("/", routes![index]))
 }
 
