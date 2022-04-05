@@ -1,14 +1,14 @@
 use yew::prelude::*;
+use crate::header::Header;
 
-enum Msg {
+pub enum Msg {
     AddOne,
 }
-
-struct Model {
+pub struct App {
     value: i64,
 }
 
-impl Component for Model {
+impl Component for App {
     type Message = Msg;
     type Properties = ();
 
@@ -34,13 +34,11 @@ impl Component for Model {
         let link = ctx.link();
         html! {
             <div>
+                <Header title="Rusty Connect 4"/>
+                <input type="text" value="2" id="PrimeNumber" />
                 <button onclick={link.callback(|_| Msg::AddOne)}>{ "+1" }</button>
                 <p>{ self.value }</p>
             </div>
         }
     }
-}
-
-fn main() {
-    yew::start_app::<Model>();
 }
