@@ -1,44 +1,27 @@
 use yew::prelude::*;
-use crate::header::Header;
+use yew_router::prelude::*;
 
-pub enum Msg {
-    AddOne,
-}
-pub struct App {
-    value: i64,
-}
+use crate::routes::{switch, AppRoute};
 
-impl Component for App {
-    type Message = Msg;
-    type Properties = ();
-
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self {
-            value: 0,
-        }
-    }
-
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Msg::AddOne => {
-                self.value += 1;
-                // the value has changed so we need to
-                // re-render for it to appear on the page
-                true
-            }
-        }
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        // This gives us a component's "`Scope`" which allows us to send messages, etc to the component.
-        let link = ctx.link();
-        html! {
-            <div>
-                <Header title="Rusty Connect 4"/>
-                <input type="text" value="2" id="PrimeNumber" />
-                <button onclick={link.callback(|_| Msg::AddOne)}>{ "+1" }</button>
-                <p>{ self.value }</p>
+#[function_component(App)]
+pub fn app() -> Html {
+    html! {
+        <BrowserRouter>
+            <div class="header">
+                <Link<AppRoute> classes={classes!("header-logo-link")} to={AppRoute::Home}>
+                    <img class="header-logo" src="img/rust.png" />
+                    <p class="header-logo-text">{ "Rusty Connect 4" }</p>
+                </Link<AppRoute>>
+                <div class="header-pages">
+                    <Link<AppRoute> classes={classes!("header-page-link")} to={AppRoute::Home}>
+                        <p class="header-page-text">{ "Home" }</p>
+                    </Link<AppRoute>>
+                    <Link<AppRoute> classes={classes!("header-page-link")} to={AppRoute::Connect4}>
+                        <p class="header-page-text">{ "Connect4" }</p>
+                    </Link<AppRoute>>
+                </div>
             </div>
-        }
+            <Switch<AppRoute> render={Switch::render(switch)} />
+        </BrowserRouter>
     }
 }
