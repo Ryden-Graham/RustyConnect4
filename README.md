@@ -1,4 +1,6 @@
-trunk serve for front-end
+yarn install first itme you run front-end for dependencies
+
+yarn run dev for testing front-end
 
 cargo run for back-end
 
