@@ -1,6 +1,6 @@
 #![recursion_limit = "512"]
 
-mod header;
+mod home;
 mod app;
 
 use wasm_bindgen::prelude::*;
