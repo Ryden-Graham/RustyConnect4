@@ -1,0 +1,8 @@
+[debug]
+port = 7000
+
+[staging]
+port = 7000
+
+[release]
+port = 7000
