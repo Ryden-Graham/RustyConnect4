@@ -247,6 +247,8 @@ dependencies = [
  "bson",
  "mongodb",
  "rocket",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
