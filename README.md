@@ -8,3 +8,4 @@ might need to have trunk installed with "cargo install trunk"
 
 might only run on WSL
 
+update css maybe
