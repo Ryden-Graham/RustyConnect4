@@ -43,7 +43,7 @@ fn rocket() -> Result<rocket::Rocket<rocket::Build>, mongodb::error::Error> {
     }
     let collection = database.collection::<User>("test");
     println!("connected");
-    collection.delete_many(doc! { "wins": 0 }, None)?;
+    collection.delete_many(doc! { "losses": 0 }, None)?;
     let docs = vec![
         User {
             name: "Aaron".to_string(),
