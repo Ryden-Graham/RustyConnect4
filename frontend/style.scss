@@ -1,0 +1,74 @@
+body {
+  margin:0%;
+  background-color:grey;
+}
+
+a {
+  text-decoration: none !important;
+}
+
+.header {
+  display: flex;
+  width:100vw;
+  height:10vh;
+  font-size: 3px;
+  text-align:center;
+  justify-content: space-evenly;
+  background: linear-gradient(0deg,rgba(0,0,0,0) 0,rgba(0,0,0,.45) 40%,rgba(0,0,0,.7) 100%);
+
+  .header-logo-link {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    .header-logo {
+      padding-right: 5em;
+      height: 30em;
+      width: 30em;
+    }
+
+    .header-logo-text {
+      color:black;
+      font-family: egiziano-cg-black-regular, sans-serif;
+      font-weight:1000;
+    }
+  }
+  
+  .header-pages {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .header-page-link {
+      padding-right: 15em;
+    }
+
+    .header-page-text {
+      color:white;
+      font-family: egiziano-cg-black-regular, sans-serif;
+      font-weight:700;
+    }
+  }
+}
+
+.test-text {
+  height: 100px;
+}
+
+p {
+  font-size:15em;
+  color:white;
+  font-family:Cubano;
+}
+
+button {
+  width:100%;
+  height:500px;
+  font-size:18em;
+  font-family:Cubano;
+  color:white;
+  text-align:center;
+  background-color:#555555;
+  border-width:8px;
+}

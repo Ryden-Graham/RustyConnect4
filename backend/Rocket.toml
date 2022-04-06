@@ -1,8 +1,8 @@
-[development]
-port = 8080
+[debug]
+port = 8000
 
 [staging]
-port = 8080
+port = 8000
 
-[production]
-port = 8080
+[release]
+port = 8000
