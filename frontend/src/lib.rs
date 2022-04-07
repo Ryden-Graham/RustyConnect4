@@ -3,6 +3,7 @@
 pub mod app;
 pub mod routes;
 pub mod home;
+pub mod sidebar;
 
 use wasm_bindgen::prelude::*;
 
