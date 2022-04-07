@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use reqwasm::http::Request;
 
 #[function_component(Home)]
 pub fn home() -> Html {
@@ -9,9 +10,29 @@ pub fn home() -> Html {
     //     Callback::from(move |_| value.set(*value + 1))
     // };
 
+    // let data = use_state(|| vec![]);
+    // {
+    //     let data = data.clone();
+    //     use_effect_with_deps(move |_| {
+    //         let data = data.clone();
+    //         wasm_bindgen_futures::spawn_local(async move {
+    //             let fetched_data: Vec<String> = Request::get("https://yew.rs/tutorial/data.json")
+    //                 .send()
+    //                 .await
+    //                 .unwrap()
+    //                 .json()
+    //                 .await
+    //                 .unwrap();
+    //             data.set(fetched_data);
+    //         });
+    //         || ()
+    //     }, ());
+    // }
+
     html! {
             <div class="body-container" id="services">
                 <div class="main-header">
+                    // <b>{(*data).clone()}</b>
                     <b>{"How to Play Connect 4"}</b>
                 </div>
                 <hr class="header-divider"/>
