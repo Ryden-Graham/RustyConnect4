@@ -1,3 +1,29 @@
+.page-container {
+    display: flex;
+    flex-direction: row;
+}
+
+body, h1, h2, h3, h4, h5 {
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    font-size: 16px;
+}
+
+h5 {
+    font-weight: 400;
+    font-size: 18px;
+}
+
+.bodyHeader {
+    font-size:48px;
+    color: #f44336;
+}
+
+.headerDivider {
+    border-radius:4px;
+}
 /* W3.CSS 2.99 Mar 2017 by Jan Egil and Borge Refsnes */
 html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}
 /* Extract from normalize.css by Nicolas Gallagher and Jonathan Neal git.io/normalize */
