@@ -1,0 +1,44 @@
+<!DOCTYPE html><html lang="en"><head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Rusty Connect 4</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/todomvc-common@1.0.5/base.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/todomvc-app-css@2.1.2/index.css">
+        <link href="https://www.dafontfree.net/embed/ZWdpemlhbm8tY2ctYmxhY2stcmVndWxhciZkYXRhLzQ4L2UvNDI5MzYvRWdpemlhbm8gQ0cgQmxhY2sub3Rm" rel="stylesheet" type="text/css">
+        <style type="text/css">
+            a { cursor: pointer; /* Fix yew_router for now: https://github.com/yewstack/yew_router/issues/225 */}
+        </style>
+    
+<link rel="preload" href="/index-7aa51497c0497dc3_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/index-7aa51497c0497dc3.js"></head>
+    <body>
+        <script src="/todomvc.js"></script>
+    
+
+<script type="module">import init from '/index-7aa51497c0497dc3.js';init('/index-7aa51497c0497dc3_bg.wasm');</script><script>(function () {
+    var url = 'ws://' + window.location.host + '/_trunk/ws';
+    var poll_interval = 5000;
+    var reload_upon_connect = () => {
+        window.setTimeout(
+            () => {
+                // when we successfully reconnect, we'll force a
+                // reload (since we presumably lost connection to
+                // trunk due to it being killed, so it will have
+                // rebuilt on restart)
+                var ws = new WebSocket(url);
+                ws.onopen = () => window.location.reload();
+                ws.onclose = reload_upon_connect;
+            },
+            poll_interval);
+    };
+
+    var ws = new WebSocket(url);
+    ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.reload) {
+            window.location.reload();
+        }
+    };
+    ws.onclose = reload_upon_connect;
+})()
+</script></body></html>
