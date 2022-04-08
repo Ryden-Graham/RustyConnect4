@@ -45,11 +45,57 @@ fn index() -> Json<Vec<User>> {
     //     }
     // }
     // "Hello, world!"
-    rocket::serde::json::Json(vec![User {
-        name: "pls work".to_string(),
-        wins: 1,
-        losses: 2
-    }])
+
+    let mut client_options = ClientOptions::parse(
+        "mongodb+srv://myUser:myPassword@mycluster.zvnqo.mongodb.net/MyCluster?retryWrites=true&w=majority",
+    ).unwrap();
+    let client = Client::with_options(client_options).unwrap();
+    for db_name in client.list_database_names(None, None).unwrap() {
+        println!("{}", db_name);
+    }
+    println!("");
+    let database = client.database("Connect4DB");
+    for collection_name in database.list_collection_names(None).unwrap() {
+        println!("{}", collection_name);
+    }
+    let collection = database.collection::<User>("test");
+    println!("connected");
+    // standardize for testing for now REMOVE LATER
+    collection.delete_many(doc! { "losses": 0 }, None).unwrap();
+    let docs = vec![
+        User {
+            name: "Aaron".to_string(),
+            wins: 0,
+            losses: 0
+        },
+        User {
+            name: "Calvin".to_string(),
+            wins: 0,
+            losses: 0
+        },
+        User {
+            name: "Ryden".to_string(),
+            wins: 0,
+            losses: 0
+        }
+    ];
+    collection.insert_many(docs, None).unwrap();
+
+    //****************** NOTE: PUT WHATEVER QUERY YOU WANT HERE ******************* */
+    let cursor = collection.find(doc! { "wins": 0 }, None).unwrap();
+
+    let mut users = Vec::<User>::new();
+
+    for result in cursor {
+        let user = result.unwrap();
+        println!("title: {}", user.name);
+        println!("title: {}", user.wins);
+        println!("title: {}", user.losses);
+        // file.write_all(serde_json::to_string(&user).unwrap().as_bytes())?;
+        users.push(user);
+    }
+
+    rocket::serde::json::Json(users)
 }
 
 impl User {
