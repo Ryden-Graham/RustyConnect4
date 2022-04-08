@@ -1,38 +1,51 @@
 use yew::prelude::*;
 use reqwasm::http::Request;
+use serde::{Serialize, Deserialize};
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+struct User {
+    name: String,
+    wins: u32,
+    losses: u32
+}
+
+#[derive(Properties, PartialEq)]
+struct UserProps {
+    users: Vec<User>,
+}
+
+#[function_component(UsersList)]
+fn users_list(UserProps { users }: &UserProps) -> Html {
+    users.iter().map(|user| html! {
+        <p>{format!("{}: {}, {}", user.name, user.wins, user.losses)}</p>
+    }).collect()
+}
 
 #[function_component(Home)]
 pub fn home() -> Html {
-    // let value = use_state(|| 0);
-
-    // let onclickadd = {
-    //     let value = value.clone();
-    //     Callback::from(move |_| value.set(*value + 1))
-    // };
-
-    // let data = use_state(|| vec![]);
-    // {
-    //     let data = data.clone();
-    //     use_effect_with_deps(move |_| {
-    //         let data = data.clone();
-    //         wasm_bindgen_futures::spawn_local(async move {
-    //             let fetched_data: Vec<String> = Request::get("https://yew.rs/tutorial/data.json")
-    //                 .send()
-    //                 .await
-    //                 .unwrap()
-    //                 .json()
-    //                 .await
-    //                 .unwrap();
-    //             data.set(fetched_data);
-    //         });
-    //         || ()
-    //     }, ());
-    // }
+    let data = use_state(|| vec![]);
+    {
+        let data = data.clone();
+        use_effect_with_deps(move |_| {
+            let data = data.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                let fetched_data: Vec<User> = Request::get("http://127.0.0.1:7000")
+                    .send()
+                    .await
+                    .unwrap()
+                    .json()
+                    .await
+                    .unwrap();
+                data.set(fetched_data);
+            });
+            || ()
+        }, ());
+    }
 
     html! {
             <div class="body-container" id="services">
                 <div class="main-header">
-                    // <b>{(*data).clone()}</b>
+                    <UsersList users={(*data).clone()}/>
                     <b>{"How to Play Connect 4"}</b>
                 </div>
                 <hr class="header-divider"/>

@@ -1,7 +1,7 @@
 // #[macro_use] extern crate rocket;
 use mongodb::{options::ClientOptions, sync::Client};
 use mongodb::bson::{doc, Document};
-use serde::{Serialize, Deserialize};
+// use serde::{Serialize, Deserialize};
 
 use std::fs::File;
 use std::fs::OpenOptions;
@@ -13,16 +13,43 @@ extern crate notify;
 use notify::{Watcher, RecursiveMode, RawEvent, raw_watcher};
 use std::sync::mpsc::channel;
 
-// #[get("/hello")]
-// fn index() -> &'static str {
-//     "Hello, world!"
-// }
+use rocket::{post, response::content, routes, serde::{Deserialize, Serialize}};
+use rocket::serde::json::Json;
+#[macro_use] extern crate rocket;
+// use rocket_contrib::json::Json;
 
-#[derive(Debug, Serialize, Deserialize)]
+use rocket::http::Header;
+use rocket::{Request, Response};
+use rocket::fairing::{Fairing, Info, Kind};
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct User {
     name: String,
     wins: u32,
     losses: u32
+}
+
+#[get("/")]
+fn index() -> Json<Vec<User>> {
+
+    // loop {
+    //     match File::open("User.txt") {
+    //         Ok(user_file) => {
+    //             let mut contents = String::new();
+    //             file.read_to_string(&mut contents).unwrap();
+    //             println!("{:#?}", contents);
+    //             fs::remove_file("User.txt").unwrap();
+    //             break;
+    //         },
+    //         _ => {}
+    //     }
+    // }
+    // "Hello, world!"
+    rocket::serde::json::Json(vec![User {
+        name: "pls work".to_string(),
+        wins: 1,
+        losses: 2
+    }])
 }
 
 impl User {
@@ -66,89 +93,41 @@ impl User {
 //     }
 // }
 
-// fn rocket() -> Result<rocket::Rocket<rocket::Build>, mongodb::error::Error> {
-//     let mut client_options = ClientOptions::parse(
-//         "mongodb+srv://myUser:myPassword@mycluster.zvnqo.mongodb.net/MyCluster?retryWrites=true&w=majority",
-//     )?;
-//     let client = Client::with_options(client_options)?;
-//     for db_name in client.list_database_names(None, None)? {
-//         println!("{}", db_name);
-//     }
-//     println!("");
-//     let database = client.database("Connect4DB");
-//     for collection_name in database.list_collection_names(None)? {
-//         println!("{}", collection_name);
-//     }
-//     let collection = database.collection::<User>("test");
-//     println!("connected");
-//     collection.delete_many(doc! { "losses": 0 }, None)?;
-//     let docs = vec![
-//         User {
-//             name: "Aaron".to_string(),
-//             wins: 0,
-//             losses: 0
-//         },
-//         User {
-//             name: "Calvin".to_string(),
-//             wins: 0,
-//             losses: 0
-//         },
-//         User {
-//             name: "Ryden".to_string(),
-//             wins: 0,
-//             losses: 0
-//         }
-//     ];
-//     collection.insert_many(docs, None)?;
+pub struct CORS;
 
-//     let mut file = File::create("User.txt")?;
+#[rocket::async_trait]
+impl Fairing for CORS {
+    fn info(&self) -> Info {
+        Info {
+            name: "Attaching CORS headers to responses",
+            kind: Kind::Response
+        }
+    }
 
-//     let cursor = collection.find(doc! { "wins": 0 }, None)?;
-//     for result in cursor {
-//         let user = &result?;
-//         println!("title: {}", user.name);
-//         println!("title: {}", user.wins);
-//         println!("title: {}", user.losses);
-//         // bincode::serialize_into(&mut file, &result?).unwrap();
-//         // bincode::serialize_into(&mut file, &User {
-//         //     name: "Ryden".to_string(),
-//         //     wins: 0,
-//         //     losses: 0
-//         // }).unwrap();
-//         file.write_all(serde_json::to_string(&user).unwrap().as_bytes())?;
-//     }
+    async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
+        response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS"));
+        response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+    }
+}
 
-//     Ok(rocket::build().mount("/", routes![index]))
-// }
-
-// #[rocket::main]
-// async fn main() {
-//     // launch server or report error
-//     match rocket() {
-//         Ok(rocket) => {
-//             let error = rocket.launch().await;
-//             // eprintln!("Failed to launch server: {}", error);
-//         }
-//         Err(error) => eprintln!("Failed to create server: {}", error),
-//     }
-// }
-
-fn main() {
+fn rocket() -> Result<rocket::Rocket<rocket::Build>, mongodb::error::Error> {
     let mut client_options = ClientOptions::parse(
         "mongodb+srv://myUser:myPassword@mycluster.zvnqo.mongodb.net/MyCluster?retryWrites=true&w=majority",
-    ).unwrap();
-    let client = Client::with_options(client_options).unwrap();
-    for db_name in client.list_database_names(None, None).unwrap() {
+    )?;
+    let client = Client::with_options(client_options)?;
+    for db_name in client.list_database_names(None, None)? {
         println!("{}", db_name);
     }
     println!("");
     let database = client.database("Connect4DB");
-    for collection_name in database.list_collection_names(None).unwrap() {
+    for collection_name in database.list_collection_names(None)? {
         println!("{}", collection_name);
     }
     let collection = database.collection::<User>("test");
     println!("connected");
-    collection.delete_many(doc! { "losses": 0 }, None).unwrap();
+    collection.delete_many(doc! { "losses": 0 }, None)?;
     let docs = vec![
         User {
             name: "Aaron".to_string(),
@@ -166,41 +145,31 @@ fn main() {
             losses: 0
         }
     ];
-    collection.insert_many(docs, None).unwrap();
+    collection.insert_many(docs, None)?;
 
-    let mut file = OpenOptions::new()
-    .read(true)
-    .write(true)
-    .create(true)
-    .open("User.txt").unwrap();
+    let mut file = File::create("User.txt")?;
 
-    let cursor = collection.find(doc! { "wins": 0 }, None).unwrap();
+    let cursor = collection.find(doc! { "wins": 0 }, None)?;
     for result in cursor {
-        let user = &result.unwrap();
+        let user = &result?;
         println!("title: {}", user.name);
         println!("title: {}", user.wins);
         println!("title: {}", user.losses);
-        // bincode::serialize_into(&mut file, &result?).unwrap();
-        // bincode::serialize_into(&mut file, &User {
-        //     name: "Ryden".to_string(),
-        //     wins: 0,
-        //     losses: 0
-        // }).unwrap();
-        file.write_all(serde_json::to_string(&user).unwrap().as_bytes()).unwrap();
+        file.write_all(serde_json::to_string(&user).unwrap().as_bytes())?;
     }
-    println!("waiting");
-    // wait_until_file_created();
-    loop {
-        match File::open("User.txt") {
-            Ok(user_file) => {
-                let mut contents = String::new();
-                file.read_to_string(&mut contents).unwrap();
-                println!("{:#?}", contents);
-                fs::remove_file("User.txt").unwrap();
-                break;
-            },
-            _ => {}
+
+    Ok(rocket::build().mount("/", routes![index]))
+}
+
+#[rocket::main]
+async fn main() {
+    // launch server or report error
+    match rocket() {
+        Ok(rocket) => {
+            let error = rocket
+            .attach(CORS)
+            .launch().await;
         }
+        Err(error) => eprintln!("Failed to create server: {}", error),
     }
-    println!("done!");
 }
