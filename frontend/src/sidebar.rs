@@ -2,17 +2,7 @@ use std::borrow::Borrow;
 
 use yew_router::prelude::*;
 use yew::prelude::*;
-
-#[derive(Clone, Routable, PartialEq)]
-enum AppRoute {
-    #[at("/")]
-    Home,
-    #[at("/connect4")]
-    Connect4,
-    #[not_found]
-    #[at("/404")]
-    NotFound,
-}
+use crate::routes::AppRoute;
 
 #[function_component(Sidebar)]
 pub fn sidebar() -> Html {
@@ -26,8 +16,15 @@ pub fn sidebar() -> Html {
                 <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::Home}>
                     <p class="header-page-text">{ "Home" }</p>
                 </Link<AppRoute>>
+                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::HowToConnect4}>
+                    <p class="header-page-text">{ "How to Play Connect4" }</p>
+                </Link<AppRoute>>
                 <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::Connect4}>
                     <p class="header-page-text">{ "Connect4" }</p>
+                </Link<AppRoute>>
+                <br/>
+                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::HowToToot}>
+                    <p class="header-page-text">{ "How to Play TOOT-OTTO" }</p>
                 </Link<AppRoute>>
             </nav>
             <div class="sidebar-padder"/>
