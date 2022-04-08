@@ -19,8 +19,8 @@ pub fn sidebar() -> Html {
                 <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::HowToConnect4}>
                     <p class="header-page-text">{ "How to Play Connect4" }</p>
                 </Link<AppRoute>>
-                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::Connect4}>
-                    <p class="header-page-text">{ "Connect4" }</p>
+                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::Connect4Computer}>
+                    <p class="header-page-text">{ "Play Connect4 With a Computer" }</p>
                 </Link<AppRoute>>
                 <br/>
                 <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::HowToToot}>
