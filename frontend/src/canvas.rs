@@ -265,13 +265,13 @@
 
 //         self.paused = false;
 //         // TODO: Add rejectclick callback
-//         let mut done = self.action(choice as usize, true);
+//         let mut done = self.player_action(choice as usize, true);
 
 //         // TODO: Add rejectclick callback
 //         while done < 0 {
 //             log::info!("Using random agent");
 //             let random_choice = self.get_random_val(7);
-//             done = self.action(random_choice, true);
+//             done = self.player_action(random_choice, true);
 //         }
 //     }
 
@@ -484,7 +484,7 @@
 //         }
 //     }
 
-//     pub fn action(&mut self, column: usize, mode: bool) -> i64 {
+//     pub fn player_action(&mut self, column: usize, mode: bool) -> i64 {
 //         if self.paused || self.won {
 //             return 0;
 //         }
@@ -621,7 +621,7 @@
 //                     if self.on_region(x, (75 * j + 100) as f64, 25 as f64) {
 //                         self.paused = false;
 
-//                         let valid = self.action(j, false);
+//                         let valid = self.player_action(j, false);
 //                         if valid == 1 {
 //                             self.reject_click = true;
 //                         };
@@ -891,6 +891,159 @@ impl CanvasModel {
         self.fetch_task = self.fetch_service.fetch(request, callback).ok();
 
         self.canvas_context.as_ref().unwrap().restore();
+    }
+
+    pub fn animate(&mut self, column: usize, current_turn: i64, to_row: usize, cur_pos: usize, mode: bool) {
+        let mut fg_color = "transparent";
+        if current_turn >= 1 {
+            fg_color = "#ff0000";
+        } else if current_turn <= -1 {
+            fg_color = "#ffff00";
+        }
+
+        if to_row * 75 >= cur_pos {
+            self.clear();
+            self.draw();
+            self.draw_circle((75 * column + 100) as u32, (cur_pos + 50) as u32, &fg_color, "black");
+            self.draw_mask();
+
+            let cloned = self.animate_call_back_click.clone();
+            window().request_animation_frame(enclose!((cloned) move |_| {
+                cloned.emit((column, current_turn, to_row, cur_pos+25, mode));
+            }));
+        } else {
+            self.map[to_row][column] = self.player_move();
+            self.current_turn += 1;
+            self.draw();
+            self.check();
+            if mode == false && self.props.player2.as_ref().unwrap() == "Computer" {
+                self.ai(-1);
+            } else {
+                self.reject_click = false;
+            }
+        }
+    }
+
+    pub fn player_action(&mut self, column: usize, mode: bool) -> i64 {
+        if self.paused || self.won {
+            return 0;
+        }
+
+        if self.map[0][column] != 0 || column > 6 {
+            return -1;
+        }
+
+        let mut done = false;
+        let mut row = 0;
+        for i in (0..6).rev() {
+            if self.map[i][column] == 0 {
+                done = true;
+                row = i;
+                break;
+            }
+        }
+
+        self.animate(column, self.player_move(), row, 0, mode);
+
+        self.paused = true;
+        return 1;
+    }
+}
+
+impl Component for CanvasModel {
+    type Message = Message;
+    type Properties = Props;
+
+    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+        let canvas_id = props.canvas_id.clone().unwrap();
+
+        let mut map: Vec<Vec<i64>> = vec![vec![0; 7]; 6];
+
+        Self {
+            props,
+            canvas_id,
+            canvas: None,
+            canvas_context: None,
+            call_back_click: link.callback(|e: ClickEvent| Message::Click(e)),
+            animate_call_back_click: link
+                .callback(|e: (usize, i64, usize, usize, bool)| Message::AnimateCallback(e)),
+            map,
+            current_turn: 0,
+            paused: false,
+            won: false,
+            reject_click: false,
+            fetch_service: FetchService::new(),
+            fetch_task: None,
+            link,
+        }
+    }
+
+    fn update(&mut self, message: Self::Message) -> ShouldRender {
+        match message {
+            Message::Click(e) => {
+                if self.reject_click {
+                    return false;
+                }
+
+                if self.won {
+                    self.reset();
+                    self.props.game_done_call_back_click.emit(0);
+                    return true;
+                }
+
+                let rect = self.canvas.as_ref().unwrap().get_bounding_client_rect();
+                let x = e.client_x() as f64 - rect.get_left();
+
+                for j in 0..7 {
+                    if self.on_region(x, (75 * j + 100) as f64, 25 as f64) {
+                        self.paused = false;
+
+                        let valid = self.player_action(j, false);
+                        if valid == 1 {
+                            self.reject_click = true;
+                        };
+
+                        break;
+                    }
+                }
+            }
+            Message::AnimateCallback((a, b, c, d, e)) => {
+                self.animate(a, b, c, d, e);
+            }
+            Message::Ignore => {}
+        };
+
+        true
+    }
+
+    fn view(&self) -> Html {
+        html! {
+            <canvas id={&self.canvas_id} height="480" width="640"></canvas>
+        }
+    }
+
+    fn mounted(&mut self) -> ShouldRender {
+        self.canvas = Some(canvas(self.canvas_id.as_str()));
+        self.canvas_context = Some(context(self.canvas_id.as_str()));
+
+        let canvas_context = self.canvas_context.as_ref().unwrap();
+        let cloned_call_back_click = self.call_back_click.clone();
+
+        self.canvas.as_ref().unwrap().add_event_listener(enclose!(
+            (canvas_context) move | event: ClickEvent | {
+                cloned_call_back_click.emit(event);
+            }
+        ));
+
+        // clears and draws mask
+        self.reset();
+
+        true
+    }
+
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        self.props = props;
+        true
     }
 }
 
