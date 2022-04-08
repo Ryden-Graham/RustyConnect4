@@ -3,6 +3,8 @@
 pub mod app;
 pub mod routes;
 pub mod home;
+pub mod howToConnect4;
+pub mod howToToot;
 pub mod sidebar;
 
 use wasm_bindgen::prelude::*;
