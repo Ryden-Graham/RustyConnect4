@@ -51,7 +51,7 @@ body {
 
 .sidebar-page-link {
     display: block;
-    padding:8px 16px;
+    padding: 0px 16px;
     text-decoration: none;
     color: white;
 }
@@ -74,4 +74,33 @@ body {
     margin: 10px 0;
     font-size: 24px;
     font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.name-textbox {
+    font-size: 20px;
+}
+
+.name-entry-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.button {
+    background-color: #e9e9ed;
+    color: black;
+    border: 1px solid black;
+    padding: 0px 5px;
+    border-radius: 4px;
+}
+
+.button:hover {
+    background-color: #d0d0d7;
+}
+
+.button:active {
+    background-color: #b1b1b9
+}
+
+.start-game {
+    margin-left: 15px;
 }
