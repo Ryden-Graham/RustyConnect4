@@ -62,21 +62,23 @@ pub fn home() -> Html {
     }
     
     let send_data = {
+        let games_list = games_list.clone();
         let num_games = games_list.len();
+        let utc: DateTime<Utc> = Utc::now();
         Callback::from(move |_| {
+            let new_game = Game {
+                id: num_games as u32 + 1,
+                game_type: true, 
+                player_1_name: "mr_NODED_abuser".to_string(),
+                player_2_name: "computer".to_string(),
+                player_2_is_computer: true,
+                player1_won: false,
+                date: utc
+            };
+            // games_list.push(new_game.clone());
+            let mut new_list = (*games_list).clone();
+            new_list.push(new_game.clone());
             wasm_bindgen_futures::spawn_local(async move {
-                let utc: DateTime<Utc> = Utc::now();
-
-                let new_game = Game {
-                    id: num_games as u32 + 1,
-                    game_type: true, 
-                    player_1_name: "mr_NODED_abuser".to_string(),
-                    player_2_name: "computer".to_string(),
-                    player_2_is_computer: true,
-                    player1_won: false,
-                    date: utc
-                };
-            
                 let sent = reqwest::Client::new()
                     .post("http://127.0.0.1:7000/client")
                     .json(&new_game)
@@ -86,10 +88,12 @@ pub fn home() -> Html {
                     .text()
                     .await.unwrap();
             });
+            games_list.set(new_list.to_vec());
         })
     };
 
     let nuke = {
+        let games_list = games_list.clone();
         Callback::from(move |_| {
             wasm_bindgen_futures::spawn_local(async move {          
                 let sent = reqwest::Client::new()
@@ -101,6 +105,7 @@ pub fn home() -> Html {
                     .text()
                     .await.unwrap();
             });
+            games_list.set(Vec::<Game>::new());
         })
     };
 
