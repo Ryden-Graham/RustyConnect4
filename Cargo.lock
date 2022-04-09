@@ -23,12 +23,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anyhow"
-version = "1.0.56"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4361135be9122e0870de935d7c439aef945b9f9ddd4199a553b5270b49c82a27"
-
-[[package]]
 name = "async-attributes"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -233,6 +227,7 @@ name = "backend"
 version = "0.1.0"
 dependencies = [
  "bson",
+ "chrono",
  "mongodb",
  "notify",
  "rocket 0.5.0-rc.1",
@@ -371,10 +366,13 @@ version = "0.4.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "670ad68c9088c2a963aaa298cb369688cf3f9465ce5e2d4ca10e6e0098a1ce73"
 dependencies = [
+ "js-sys",
  "libc",
  "num-integer",
  "num-traits",
+ "serde",
  "time 0.1.43",
+ "wasm-bindgen",
  "winapi 0.3.9",
 ]
 
@@ -2019,23 +2017,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "reqwasm"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e34bf31941fb867ae9386a4b443b388e6713574944e6517136ee21a6a93cf996"
-dependencies = [
- "anyhow",
- "futures",
- "js-sys",
- "serde",
- "serde_json",
- "thiserror",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
 name = "reqwest"
 version = "0.11.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2292,7 +2273,7 @@ checksum = "f2cc38e8fa666e2de3c4aba7edeb5ffc5246c1c2ed0e3d17e560aeeba736b23f"
 name = "rusty-connect4"
 version = "0.1.0"
 dependencies = [
- "reqwasm",
+ "chrono",
  "reqwest",
  "serde",
  "wasm-bindgen",
