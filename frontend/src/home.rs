@@ -1,38 +1,53 @@
 use yew::prelude::*;
+use chrono::{DateTime, Utc};
 // use reqwasm::http::Request;
 // use reqwest::*;
 use serde::{Serialize, Deserialize};
+use chrono::prelude::*;
 
 // use hyper::header::{Headers, AccessControlAllowOrigin};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-struct User {
-    name: String,
-    wins: u32,
-    losses: u32
+struct Game {
+    id: u32,
+    game_type: bool, 
+    player_1_name: String,
+    player_2_name: String,
+    player_2_is_computer: bool,
+    player1_won: bool,
+    date: DateTime<Utc>
 }
 
 #[derive(Properties, PartialEq)]
-struct UserProps {
-    users: Vec<User>,
+struct GameProps {
+    games: Vec<Game>,
 }
 
-#[function_component(UsersList)]
-fn users_list(UserProps { users }: &UserProps) -> Html {
-    users.iter().map(|user| html! {
-        <p>{format!("{}: {}, {}", user.name, user.wins, user.losses)}</p>
+#[function_component(GamesList)]
+fn games_list(GameProps { games }: &GameProps) -> Html {
+    games.iter().map(|game| html! {
+        <p>{format!("id: {}, type: {}, p1: {}, p2: {}, p2isCPU: {}, player1_won: {}, date: {}",
+            game.id,
+            game.game_type,
+            game.player_1_name,
+            game.player_2_name,
+            game.player_2_is_computer,
+            game.player1_won,
+            game.date
+        )}</p>
     }).collect()
 }
 
 #[function_component(Home)]
 pub fn home() -> Html {
-    let data = use_state(|| vec![]);
+    let games_list = use_state(|| Vec::<Game>::new());
+
     {
-        let data = data.clone();
+        let games_list = games_list.clone();
         use_effect_with_deps(move |_| {
-            let data = data.clone();
+            let games_list = games_list.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_data: Vec<User> = reqwest::Client::new()
+                let fetched_data: Vec<Game> = reqwest::Client::new()
                     .get("http://127.0.0.1:7000")
                     .send()
                     .await
@@ -40,26 +55,46 @@ pub fn home() -> Html {
                     .json()
                     .await
                     .unwrap();
-                data.set(fetched_data);
+                games_list.set(fetched_data);
             });
             || ()
         }, ());
     }
     
-    let debug = use_state(|| "0".to_string());
     let send_data = {
-        let data = data.clone();
+        let num_games = games_list.len();
         Callback::from(move |_| {
             wasm_bindgen_futures::spawn_local(async move {
-                let test_user = User {
-                    name: "mr_NODED_abuser".to_string(),
-                    wins: 100,
-                    losses: 10
+                let utc: DateTime<Utc> = Utc::now();
+
+                let new_game = Game {
+                    id: num_games as u32 + 1,
+                    game_type: true, 
+                    player_1_name: "mr_NODED_abuser".to_string(),
+                    player_2_name: "computer".to_string(),
+                    player_2_is_computer: true,
+                    player1_won: false,
+                    date: utc
                 };
             
                 let sent = reqwest::Client::new()
                     .post("http://127.0.0.1:7000/client")
-                    .json(&test_user)
+                    .json(&new_game)
+                    .send()
+                    .await
+                    .unwrap()
+                    .text()
+                    .await.unwrap();
+            });
+        })
+    };
+
+    let nuke = {
+        Callback::from(move |_| {
+            wasm_bindgen_futures::spawn_local(async move {          
+                let sent = reqwest::Client::new()
+                    .post("http://127.0.0.1:7000/command")
+                    .body("nuke the world")
                     .send()
                     .await
                     .unwrap()
@@ -72,9 +107,9 @@ pub fn home() -> Html {
     html! {
             <div class="body-container" id="services">
                 <div class="main-header">
-                    <UsersList users={(*data).clone()}/>
-                    <button onclick={send_data}>{ "Send Data!!!!" }</button>
-                    <p>{debug.to_string()}</p>
+                    <GamesList games={(*games_list).clone()}/>
+                    <button onclick={send_data}>{ "Add Game!!!" }</button>
+                    <button onclick={nuke}>{ "NUKE DATABASE" }</button>
                     <b>{"Welcome"}</b>
                 </div>
                 <hr class="header-divider"/>
