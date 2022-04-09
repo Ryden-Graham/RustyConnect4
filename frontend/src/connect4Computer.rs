@@ -7,7 +7,7 @@ pub enum Difficulty {
     Medium,
     Hard,
 }
-use Difficulty::*;
+// use Difficulty::*;
 
 #[function_component(Connect4Computer)]
 pub fn connect4Computer() -> Html {
@@ -17,15 +17,21 @@ pub fn connect4Computer() -> Html {
     let is_game_on = use_state(|| false);
     let disabled = use_state(|| false);
     let start_game = {
-        is_game_on.set(true);
-        disabled.set(true);
-        display_state.set("block".to_string());
+        let is_game_on = is_game_on.clone();
+        let disabled = disabled.clone();
+        let display_state = display_state.clone();
+
+        Callback::from(move |_| {
+            is_game_on.set(true);
+            disabled.set(true);
+            display_state.set("block".to_string());
+        })
     };
-    let end_game = {
-        is_game_on.set(false);
-        disabled.set(false);
-        display_state.set("none".to_string());
-    };
+    // let end_game = {
+    //     is_game_on.set(false);
+    //     disabled.set(false);
+    //     display_state.set("none".to_string());
+    // };
 
     html! {
         <div class="body-container" id="services">
@@ -54,12 +60,12 @@ pub fn connect4Computer() -> Html {
                 <h4>{format!("New Game: {} Vs Computer", *player_name)}</h4>
                 <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
                 <br/>
-                <CanvasModel  
-                    canvas_id = "connect_computer" 
-                    player1 = {*player_name.clone()}
-                    player2 = "Computer" 
+                <CanvasModel />
+                    // canvas_id = "connect_computer" 
+                    // player1 = {*player_name.clone()}
+                    // player2 = "Computer" 
                     // difficulty = self.difficulty,
-                    game_done_cbk={end_game}/>
+                    // game_done_cbk={end_game}/>
             </div>
         </div>
     }
