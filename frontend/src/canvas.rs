@@ -685,15 +685,28 @@
 //     canvas(id).get_context().unwrap()
 // }
 
-use std::error::Error
+use std::error::Error;
 use stdweb::traits::*;
 use stdweb::web::html_element::CanvasElement;
 use stdweb::web::Date;
 use stdweb::web::FillRule;
 use stdweb::web::{document, window, CanvasRenderingContext2d};
-use yew::format::Json;
-use yew::services::fetch::{FetchService, FetchTask, Request, Response};
+use stdweb::web::event::ClickEvent;
+// use yew::format::Json;
+// use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 use yew::{prelude::*, virtual_dom::VNode, Properties};
+use log;
+use crate::connect4Computer::Difficulty::{self, *};
+use crate::ScoreBoard::Game;
+
+macro_rules! enclose {
+    ( ($( $x:ident ),*) $y:expr ) => {
+        {
+            $(let $x = $x.clone();)*
+            $y
+        }
+    };
+}
 
 pub struct CanvasModel {
     props: Props,
@@ -707,9 +720,9 @@ pub struct CanvasModel {
     won: bool,
     paused: bool,
     reject_click: bool,
-    fetch_service: FetchService,
-    fetch_task: Option<FetchTask>,
-    link: ComponentLink<CanvasModel>,
+    // fetch_service: FetchService,
+    // fetch_task: Option<FetchTask>,
+    // link: ComponentLink<CanvasModel>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -719,6 +732,12 @@ pub struct Props {
     pub difficulty: Difficulty,
     pub canvas_id: Option<String>,
     pub game_done_call_back_click: Callback<i64>,
+}
+
+pub enum Message {
+    Click(ClickEvent),
+    AnimateCallback((usize, i64, usize, usize, bool)),
+    Ignore,
 }
 
 impl CanvasModel {
@@ -873,22 +892,22 @@ impl CanvasModel {
             GameDate: Date::now() as u64,
         };
 
-        // construct callback
-        let callback = self
-            .link
-            .callback(move |response: Response<Result<String, Error>>| {
-                info!("successfully saved!");
-                Message::Ignore
-            });
+        // // construct callback
+        // let callback = self
+        //     .link
+        //     .callback(move |response: Response<Result<String, Error>>| {
+        //         log::info!("successfully saved!");
+        //         Message::Ignore
+        //     });
 
-        // construct request
-        let request = Request::post("/games")
-            .header("Content-Type", "application/json")
-            .body(Json(&game))
-            .unwrap();
+        // // construct request
+        // let request = Request::post("/games")
+        //     .header("Content-Type", "application/json")
+        //     .body(Json(&game))
+        //     .unwrap();
 
-        // send the request
-        self.fetch_task = self.fetch_service.fetch(request, callback).ok();
+        // // send the request
+        // self.fetch_task = self.fetch_service.fetch(request, callback).ok();
 
         self.canvas_context.as_ref().unwrap().restore();
     }
@@ -917,7 +936,7 @@ impl CanvasModel {
             self.draw();
             self.check();
             if mode == false && self.props.player2.as_ref().unwrap() == "Computer" {
-                self.ai(-1);
+                // self.ai(-1);
             } else {
                 self.reject_click = false;
             }
@@ -948,102 +967,113 @@ impl CanvasModel {
         self.paused = true;
         return 1;
     }
+
+    pub fn clear(&self) {
+        self.canvas_context.as_ref().unwrap().clear_rect(0.0, 0.0, self.canvas.as_ref().unwrap().width() as f64, self.canvas.as_ref().unwrap().height() as f64);
+    }
+
+    pub fn player_move(&self) -> i64 {
+        if self.current_turn % 2 == 0 {
+            return 1;
+        }
+        return -1;
+    }
 }
 
-impl Component for CanvasModel {
-    type Message = Message;
-    type Properties = Props;
+// impl Component for CanvasModel {
+//     type Message = Message;
+//     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let canvas_id = props.canvas_id.clone().unwrap();
+//     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+//         let canvas_id = props.canvas_id.clone().unwrap();
 
-        let mut map: Vec<Vec<i64>> = vec![vec![0; 7]; 6];
+//         let mut map: Vec<Vec<i64>> = vec![vec![0; 7]; 6];
 
-        Self {
-            props,
-            canvas_id,
-            canvas: None,
-            canvas_context: None,
-            call_back_click: link.callback(|e: ClickEvent| Message::Click(e)),
-            animate_call_back_click: link
-                .callback(|e: (usize, i64, usize, usize, bool)| Message::AnimateCallback(e)),
-            map,
-            current_turn: 0,
-            paused: false,
-            won: false,
-            reject_click: false,
-            fetch_service: FetchService::new(),
-            fetch_task: None,
-            link,
-        }
-    }
+//         Self {
+//             props,
+//             canvas_id,
+//             canvas: None,
+//             canvas_context: None,
+//             call_back_click: link.callback(|e: ClickEvent| Message::Click(e)),
+//             animate_call_back_click: link
+//                 .callback(|e: (usize, i64, usize, usize, bool)| Message::AnimateCallback(e)),
+//             map,
+//             current_turn: 0,
+//             paused: false,
+//             won: false,
+//             reject_click: false,
+//             fetch_service: FetchService::new(),
+//             fetch_task: None,
+//             link,
+//         }
+//     }
 
-    fn update(&mut self, message: Self::Message) -> ShouldRender {
-        match message {
-            Message::Click(e) => {
-                if self.reject_click {
-                    return false;
-                }
+//     fn update(&mut self, message: Self::Message) -> ShouldRender {
+//         match message {
+//             Message::Click(e) => {
+//                 if self.reject_click {
+//                     return false;
+//                 }
 
-                if self.won {
-                    self.reset();
-                    self.props.game_done_call_back_click.emit(0);
-                    return true;
-                }
+//                 if self.won {
+//                     self.reset();
+//                     self.props.game_done_call_back_click.emit(0);
+//                     return true;
+//                 }
 
-                let rect = self.canvas.as_ref().unwrap().get_bounding_client_rect();
-                let x = e.client_x() as f64 - rect.get_left();
+//                 let rect = self.canvas.as_ref().unwrap().get_bounding_client_rect();
+//                 let x = e.client_x() as f64 - rect.get_left();
 
-                for j in 0..7 {
-                    if self.on_region(x, (75 * j + 100) as f64, 25 as f64) {
-                        self.paused = false;
+//                 for j in 0..7 {
+//                     if self.on_region(x, (75 * j + 100) as f64, 25 as f64) {
+//                         self.paused = false;
 
-                        let valid = self.player_action(j, false);
-                        if valid == 1 {
-                            self.reject_click = true;
-                        };
+//                         let valid = self.player_action(j, false);
+//                         if valid == 1 {
+//                             self.reject_click = true;
+//                         };
 
-                        break;
-                    }
-                }
-            }
-            Message::AnimateCallback((a, b, c, d, e)) => {
-                self.animate(a, b, c, d, e);
-            }
-            Message::Ignore => {}
-        };
+//                         break;
+//                     }
+//                 }
+//             }
+//             Message::AnimateCallback((a, b, c, d, e)) => {
+//                 self.animate(a, b, c, d, e);
+//             }
+//             Message::Ignore => {}
+//         };
 
-        true
-    }
+//         true
+//     }
 
-    fn view(&self) -> Html {
-        html! {
-            <canvas id={&self.canvas_id} height="480" width="640"></canvas>
-        }
-    }
+//     fn view(&self) -> Html {
+//         html! {
+//             <canvas id={&self.canvas_id} height="480" width="640"></canvas>
+//         }
+//     }
 
-    fn mounted(&mut self) -> ShouldRender {
-        self.canvas = Some(canvas(self.canvas_id.as_str()));
-        self.canvas_context = Some(context(self.canvas_id.as_str()));
+//     fn mounted(&mut self) -> ShouldRender {
+//         self.canvas = Some(canvas(self.canvas_id.as_str()));
+//         self.canvas_context = Some(context(self.canvas_id.as_str()));
 
-        let canvas_context = self.canvas_context.as_ref().unwrap();
-        let cloned_call_back_click = self.call_back_click.clone();
+//         let canvas_context = self.canvas_context.as_ref().unwrap();
+//         let cloned_call_back_click = self.call_back_click.clone();
 
-        self.canvas.as_ref().unwrap().add_event_listener(enclose!(
-            (canvas_context) move | event: ClickEvent | {
-                cloned_call_back_click.emit(event);
-            }
-        ));
+//         self.canvas.as_ref().unwrap().add_event_listener(enclose!(
+//             (canvas_context) move | event: ClickEvent | {
+//                 cloned_call_back_click.emit(event);
+//             }
+//         ));
 
-        // clears and draws mask
-        self.reset();
+//         // clears and draws mask
+//         self.reset();
 
-        true
-    }
+//         true
+//     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props = props;
-        true
-    }
-}
+//     fn change(&mut self, props: Self::Properties) -> ShouldRender {
+//         self.props = props;
+//         true
+//     }
+// }
 

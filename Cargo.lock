@@ -2155,8 +2155,10 @@ checksum = "f2cc38e8fa666e2de3c4aba7edeb5ffc5246c1c2ed0e3d17e560aeeba736b23f"
 name = "rusty-connect4"
 version = "0.1.0"
 dependencies = [
+ "log 0.4.16",
  "reqwasm",
  "serde",
+ "stdweb",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -2462,6 +2464,8 @@ checksum = "d022496b16281348b52d0e30ae99e01a73d737b2f45d38fed4edf79f9325a1d5"
 dependencies = [
  "discard",
  "rustc_version",
+ "serde",
+ "serde_json",
  "stdweb-derive",
  "stdweb-internal-macros",
  "stdweb-internal-runtime",
