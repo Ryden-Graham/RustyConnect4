@@ -7,6 +7,8 @@ pub mod howToConnect4;
 pub mod connect4Computer;
 pub mod howToToot;
 pub mod sidebar;
+pub mod canvas;
+pub mod ScoreBoard;
 
 use wasm_bindgen::prelude::*;
 
