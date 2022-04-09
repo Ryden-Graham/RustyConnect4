@@ -1,6 +1,9 @@
 use yew::prelude::*;
-use reqwasm::http::Request;
+// use reqwasm::http::Request;
+// use reqwest::*;
 use serde::{Serialize, Deserialize};
+
+// use hyper::header::{Headers, AccessControlAllowOrigin};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 struct User {
@@ -29,7 +32,8 @@ pub fn home() -> Html {
         use_effect_with_deps(move |_| {
             let data = data.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_data: Vec<User> = Request::get("http://127.0.0.1:7000")
+                let fetched_data: Vec<User> = reqwest::Client::new()
+                    .get("http://127.0.0.1:7000")
                     .send()
                     .await
                     .unwrap()
@@ -41,11 +45,36 @@ pub fn home() -> Html {
             || ()
         }, ());
     }
+    
+    let debug = use_state(|| "0".to_string());
+    let send_data = {
+        let data = data.clone();
+        Callback::from(move |_| {
+            wasm_bindgen_futures::spawn_local(async move {
+                let test_user = User {
+                    name: "mr_NODED_abuser".to_string(),
+                    wins: 100,
+                    losses: 10
+                };
+            
+                let sent = reqwest::Client::new()
+                    .post("http://127.0.0.1:7000/client")
+                    .json(&test_user)
+                    .send()
+                    .await
+                    .unwrap()
+                    .text()
+                    .await.unwrap();
+            });
+        })
+    };
 
     html! {
             <div class="body-container" id="services">
                 <div class="main-header">
                     <UsersList users={(*data).clone()}/>
+                    <button onclick={send_data}>{ "Send Data!!!!" }</button>
+                    <p>{debug.to_string()}</p>
                     <b>{"Welcome"}</b>
                 </div>
                 <hr class="header-divider"/>
