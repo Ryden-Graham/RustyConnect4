@@ -750,6 +750,23 @@ impl CanvasModel {
         self.clear();
         self.draw_mask();
     }
+
+    pub fn add_disk(&self, old_board: &Vec<Vec<i64>>, column: usize, value: i64) -> Vec<Vec<i64>> {
+        let mut new_board = old_board.clone();
+        let mut done = false;
+        let mut row = 0;
+
+        for i in (0..6).rev() {
+            if new_board[i][column] == 0 {
+                done = true;
+                row = i;
+                break;
+            }
+        }
+
+        new_board[row][column] = value;
+        return new_board;
+    }
     
     pub fn check(&mut self) {
         let mut right = 0;
@@ -802,58 +819,51 @@ impl CanvasModel {
         }
     }
 
-    pub fn add_disk(&self, old_board: &Vec<Vec<i64>>, column: usize, value: i64) -> Vec<Vec<i64>> {
-        let mut new_board = old_board.clone();
+    pub fn player_action(&mut self, column: usize, mode: bool) -> i64 {
+        if self.paused || self.won {
+            return 0;
+        }
+
+        if self.map[0][column] != 0 || column > 6 {
+            return -1;
+        }
+
         let mut done = false;
         let mut row = 0;
-
         for i in (0..6).rev() {
-            if new_board[i][column] == 0 {
+            if self.map[i][column] == 0 {
                 done = true;
                 row = i;
                 break;
             }
         }
 
-        new_board[row][column] = value;
-        return new_board;
+        self.animate(column, self.player_move(), row, 0, mode);
+
+        self.paused = true;
+        return 1;
     }
 
-    pub fn draw_circle(&self, x: u32, y: u32, color: &str, outline: &str) {
-        self.canvas_context.as_ref().unwrap().save();
-        self.canvas_context.as_ref().unwrap().set_fill_style_color(&color);
-        self.canvas_context.as_ref().unwrap().set_stroke_style_color(&outline);
-        self.canvas_context.as_ref().unwrap().begin_path();
-        self.canvas_context.as_ref().unwrap().arc(x as f64, y as f64, 25.0, 0.0, 2.0 * std::f64::consts::PI, false);
-        self.canvas_context.as_ref().unwrap().fill(FillRule::NonZero);
-        self.canvas_context.as_ref().unwrap().restore();
-    }
-
-    pub fn draw_mask(&self) {
-        self.canvas_context.as_ref().unwrap().save();
-        self.canvas_context.as_ref().unwrap().set_fill_style_color("#00bfff");
-        self.canvas_context.as_ref().unwrap().begin_path();
-        for y in 0..6 {
-            for x in 0..7 {
-                self.canvas_context.as_ref().unwrap().arc((75 * x + 100) as f64, (75 * y + 50) as f64, 25.0, 0.0, 2.0 * std::f64::consts::PI, false);
-                self.canvas_context.as_ref().unwrap().rect((75 * x + 150) as f64, (75 * y) as f64, -100.0, 100.0);
-            }
+    pub fn player_move(&self) -> i64 {
+        if self.current_turn % 2 == 0 {
+            return 1;
         }
-        self.canvas_context.as_ref().unwrap().fill(FillRule::NonZero);
-        self.canvas_context.as_ref().unwrap().restore();
+        return -1;
     }
 
-    pub fn draw(&self) {
-        for y in 0..6 {
-            for x in 0..7 {
-                let mut fg_color = "transparent";
-                if self.map[y][x] >= 1 {
-                    fg_color = "#ff0000";
-                } else if self.map[y][x] <= -1 {
-                    fg_color = "#ffff00";
-                }
-                self.draw_circle((75 * x + 100) as u32, (75 * y + 50) as u32, &fg_color, "black");
-            }
+    pub fn ai(&mut self, ai_move_value: i64) {
+        let new_map = self.map.clone();
+        let val_choice = self.max_state(ai_move_value, &new_map, 0, -100000000007, 100000000007);
+
+        let val = val_choice.0;
+        let choice = val_choice.1;
+        self.paused = false;
+        let mut done = self.player_action(choice as usize, true);
+        
+        while done < 0 {
+            log::info!("Using random agent");
+            let random_choice = self.get_random_val(7);
+            done = self.player_action(random_choice, true);
         }
     }
 
@@ -912,6 +922,44 @@ impl CanvasModel {
         self.canvas_context.as_ref().unwrap().restore();
     }
 
+    pub fn draw_circle(&self, x: u32, y: u32, color: &str, outline: &str) {
+        self.canvas_context.as_ref().unwrap().save();
+        self.canvas_context.as_ref().unwrap().set_fill_style_color(&color);
+        self.canvas_context.as_ref().unwrap().set_stroke_style_color(&outline);
+        self.canvas_context.as_ref().unwrap().begin_path();
+        self.canvas_context.as_ref().unwrap().arc(x as f64, y as f64, 25.0, 0.0, 2.0 * std::f64::consts::PI, false);
+        self.canvas_context.as_ref().unwrap().fill(FillRule::NonZero);
+        self.canvas_context.as_ref().unwrap().restore();
+    }
+
+    pub fn draw_mask(&self) {
+        self.canvas_context.as_ref().unwrap().save();
+        self.canvas_context.as_ref().unwrap().set_fill_style_color("#00bfff");
+        self.canvas_context.as_ref().unwrap().begin_path();
+        for y in 0..6 {
+            for x in 0..7 {
+                self.canvas_context.as_ref().unwrap().arc((75 * x + 100) as f64, (75 * y + 50) as f64, 25.0, 0.0, 2.0 * std::f64::consts::PI, false);
+                self.canvas_context.as_ref().unwrap().rect((75 * x + 150) as f64, (75 * y) as f64, -100.0, 100.0);
+            }
+        }
+        self.canvas_context.as_ref().unwrap().fill(FillRule::NonZero);
+        self.canvas_context.as_ref().unwrap().restore();
+    }
+
+    pub fn draw(&self) {
+        for y in 0..6 {
+            for x in 0..7 {
+                let mut fg_color = "transparent";
+                if self.map[y][x] >= 1 {
+                    fg_color = "#ff0000";
+                } else if self.map[y][x] <= -1 {
+                    fg_color = "#ffff00";
+                }
+                self.draw_circle((75 * x + 100) as u32, (75 * y + 50) as u32, &fg_color, "black");
+            }
+        }
+    }
+
     pub fn animate(&mut self, column: usize, current_turn: i64, to_row: usize, cur_pos: usize, mode: bool) {
         let mut fg_color = "transparent";
         if current_turn >= 1 {
@@ -936,48 +984,17 @@ impl CanvasModel {
             self.draw();
             self.check();
             if mode == false && self.props.player2.as_ref().unwrap() == "Computer" {
-                // self.ai(-1);
+                self.ai(-1);
             } else {
                 self.reject_click = false;
             }
         }
     }
 
-    pub fn player_action(&mut self, column: usize, mode: bool) -> i64 {
-        if self.paused || self.won {
-            return 0;
-        }
-
-        if self.map[0][column] != 0 || column > 6 {
-            return -1;
-        }
-
-        let mut done = false;
-        let mut row = 0;
-        for i in (0..6).rev() {
-            if self.map[i][column] == 0 {
-                done = true;
-                row = i;
-                break;
-            }
-        }
-
-        self.animate(column, self.player_move(), row, 0, mode);
-
-        self.paused = true;
-        return 1;
-    }
-
     pub fn clear(&self) {
         self.canvas_context.as_ref().unwrap().clear_rect(0.0, 0.0, self.canvas.as_ref().unwrap().width() as f64, self.canvas.as_ref().unwrap().height() as f64);
     }
 
-    pub fn player_move(&self) -> i64 {
-        if self.current_turn % 2 == 0 {
-            return 1;
-        }
-        return -1;
-    }
 }
 
 // impl Component for CanvasModel {
