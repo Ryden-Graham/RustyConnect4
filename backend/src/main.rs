@@ -1,22 +1,9 @@
-// #[macro_use] extern crate rocket;
 use mongodb::{options::ClientOptions, sync::Client};
-use mongodb::bson::{doc, Document};
-// use serde::{Serialize, Deserialize};
-
-use std::fs::File;
-use std::fs::OpenOptions;
-use std::fs;
-use std::io::prelude::*;
-
-extern crate notify;
-
-use notify::{Watcher, RecursiveMode, RawEvent, raw_watcher};
-use std::sync::mpsc::channel;
+use mongodb::bson::doc;
 
 use rocket::{post, response::content, routes, serde::{Deserialize, Serialize}};
 use rocket::serde::json::Json;
 #[macro_use] extern crate rocket;
-// use rocket_contrib::json::Json;
 
 use rocket::http::Header;
 use rocket::{Request, Response};
@@ -29,23 +16,21 @@ struct User {
     losses: u32
 }
 
+#[post("/client", format = "json", data = "<user>")]
+fn get_json(user: Json<User>) -> Json<User> {
+    println!("title: {}", user.name);
+    println!("title: {}", user.wins);
+    println!("title: {}", user.losses);
+    user
+}
+
+#[options("/client")]
+fn confirm_options() {
+    // we need this to accept options before the client posts
+}
+
 #[get("/")]
 fn index() -> Json<Vec<User>> {
-
-    // loop {
-    //     match File::open("User.txt") {
-    //         Ok(user_file) => {
-    //             let mut contents = String::new();
-    //             file.read_to_string(&mut contents).unwrap();
-    //             println!("{:#?}", contents);
-    //             fs::remove_file("User.txt").unwrap();
-    //             break;
-    //         },
-    //         _ => {}
-    //     }
-    // }
-    // "Hello, world!"
-
     let mut client_options = ClientOptions::parse(
         "mongodb+srv://myUser:myPassword@mycluster.zvnqo.mongodb.net/MyCluster?retryWrites=true&w=majority",
     ).unwrap();
@@ -91,7 +76,6 @@ fn index() -> Json<Vec<User>> {
         println!("title: {}", user.name);
         println!("title: {}", user.wins);
         println!("title: {}", user.losses);
-        // file.write_all(serde_json::to_string(&user).unwrap().as_bytes())?;
         users.push(user);
     }
 
@@ -107,37 +91,6 @@ impl User {
         }
     }
 }
-
-// fn wait_until_file_created() {
-//     let (tx, rx) = channel();
-//     let mut watcher = raw_watcher(tx).unwrap();
-//     // Watcher can't be registered for file that don't exists.
-//     // I use its parent directory instead, because I'm sure that it always exists
-//     // let file_dir = file_path.parent().unwrap();
-//     watcher.watch("../", RecursiveMode::NonRecursive).unwrap();
-//     // watcher.watch("../../../", RecursiveMode::Recursive).unwrap();
-//     // if !file_path.exists() {
-//     //     loop {
-//     //         match rx.recv_timeout(Duration::from_secs(2))? {
-//     //             RawEvent { path: Some(p), op: Ok(op::CREATE), .. } => 
-//     //                 if p == file_path {
-//     //                     break
-//     //                 },
-//     //             _ => continue,
-//     //         }
-//     //     }
-//     // }
-//     loop {
-//         match rx.recv() {
-//            Ok(RawEvent{path: Some(path), op: Ok(op), cookie}) => {
-//                println!("{:?} {:?} ({:?})", op, path, cookie);
-//             //    fs::remove_file("User.txt").unwrap();
-//            },
-//            Ok(event) => println!("broken event: {:?}", event),
-//            Err(e) => println!("watch error: {:?}", e),
-//         }
-//     }
-// }
 
 pub struct CORS;
 
@@ -158,53 +111,9 @@ impl Fairing for CORS {
     }
 }
 
+// prepare rocket for launch
 fn rocket() -> Result<rocket::Rocket<rocket::Build>, mongodb::error::Error> {
-    let mut client_options = ClientOptions::parse(
-        "mongodb+srv://myUser:myPassword@mycluster.zvnqo.mongodb.net/MyCluster?retryWrites=true&w=majority",
-    )?;
-    let client = Client::with_options(client_options)?;
-    for db_name in client.list_database_names(None, None)? {
-        println!("{}", db_name);
-    }
-    println!("");
-    let database = client.database("Connect4DB");
-    for collection_name in database.list_collection_names(None)? {
-        println!("{}", collection_name);
-    }
-    let collection = database.collection::<User>("test");
-    println!("connected");
-    collection.delete_many(doc! { "losses": 0 }, None)?;
-    let docs = vec![
-        User {
-            name: "Aaron".to_string(),
-            wins: 0,
-            losses: 0
-        },
-        User {
-            name: "Calvin".to_string(),
-            wins: 0,
-            losses: 0
-        },
-        User {
-            name: "Ryden".to_string(),
-            wins: 0,
-            losses: 0
-        }
-    ];
-    collection.insert_many(docs, None)?;
-
-    let mut file = File::create("User.txt")?;
-
-    let cursor = collection.find(doc! { "wins": 0 }, None)?;
-    for result in cursor {
-        let user = &result?;
-        println!("title: {}", user.name);
-        println!("title: {}", user.wins);
-        println!("title: {}", user.losses);
-        file.write_all(serde_json::to_string(&user).unwrap().as_bytes())?;
-    }
-
-    Ok(rocket::build().mount("/", routes![index]))
+    Ok(rocket::build().mount("/", routes![index, get_json, confirm_options]))
 }
 
 #[rocket::main]
