@@ -1,51 +1,27 @@
-// #[macro_use] extern crate rocket;
 use mongodb::{options::ClientOptions, sync::Client};
-use mongodb::bson::{doc, Document};
-// use serde::{Serialize, Deserialize};
-
-use std::fs::File;
-use std::fs::OpenOptions;
-use std::fs;
-use std::io::prelude::*;
-
-extern crate notify;
-
-use notify::{Watcher, RecursiveMode, RawEvent, raw_watcher};
-use std::sync::mpsc::channel;
+use mongodb::bson::doc;
+use chrono::{DateTime, Utc};
 
 use rocket::{post, response::content, routes, serde::{Deserialize, Serialize}};
 use rocket::serde::json::Json;
 #[macro_use] extern crate rocket;
-// use rocket_contrib::json::Json;
 
 use rocket::http::Header;
 use rocket::{Request, Response};
 use rocket::fairing::{Fairing, Info, Kind};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct User {
-    name: String,
-    wins: u32,
-    losses: u32
+struct Game {
+    id: u32,
+    game_type: bool, 
+    player_1_name: String,
+    player_2_name: String,
+    player_2_is_computer: bool,
+    player1_won: bool,
+    date: DateTime<Utc>
 }
 
-#[get("/")]
-fn index() -> Json<Vec<User>> {
-
-    // loop {
-    //     match File::open("User.txt") {
-    //         Ok(user_file) => {
-    //             let mut contents = String::new();
-    //             file.read_to_string(&mut contents).unwrap();
-    //             println!("{:#?}", contents);
-    //             fs::remove_file("User.txt").unwrap();
-    //             break;
-    //         },
-    //         _ => {}
-    //     }
-    // }
-    // "Hello, world!"
-
+fn get_game_database() -> mongodb::sync::Collection<Game> {
     let mut client_options = ClientOptions::parse(
         "mongodb+srv://myUser:myPassword@mycluster.zvnqo.mongodb.net/MyCluster?retryWrites=true&w=majority",
     ).unwrap();
@@ -58,83 +34,110 @@ fn index() -> Json<Vec<User>> {
     for collection_name in database.list_collection_names(None).unwrap() {
         println!("{}", collection_name);
     }
-    let collection = database.collection::<User>("test");
+    database.collection::<Game>("test")
+}
+
+#[post("/command", data = "<command>")]
+fn get_command(command: String) -> String {
+    // uncomment this and run to nuke database
+    if command == "nuke the world" {
+        let collection = get_game_database();
+        collection.delete_many(doc! { "player1_won": false }, None).unwrap();
+        collection.delete_many(doc! { "player1_won": true }, None).unwrap();
+    }
+    command
+}
+
+// #[options("/nuke")]
+// fn confirm__options() {
+//     // we need this to accept options before the client posts
+// }
+
+#[post("/client", format = "json", data = "<game>")]
+fn send_json(game: Json<Game>) -> Json<Game> {
+    println!("id: {}", game.id);
+    println!("type: {}", game.game_type);
+    println!("p1: {}", game.player_1_name);
+    println!("p2: {}", game.player_2_name);
+    println!("p2isCPU: {}", game.player_2_is_computer);
+    println!("player1_won: {}", game.player1_won);
+    println!("date: {}", game.date);
+
+    let mut games = vec![Game {
+        id: game.id,
+        game_type: game.game_type,
+        player_1_name: game.player_1_name.clone(),
+        player_2_name: game.player_2_name.clone(),
+        player_2_is_computer: game.player_2_is_computer,
+        player1_won: game.player1_won,
+        date: game.date
+    }];
+
+    let collection = get_game_database();
+    collection.insert_many(games, None).unwrap();
+
+    // uncomment this and run to nuke database
+    // collection.delete_many(doc! { "player1_won": false }, None).unwrap();
+    // collection.delete_many(doc! { "player1_won": true }, None).unwrap();
+    game
+}
+
+#[options("/client")]
+fn confirm_client_options() {
+    // we need this to accept options before the client posts
+}
+
+#[get("/")]
+fn index() -> Json<Vec<Game>> {
+    let collection = get_game_database();
     println!("connected");
     // standardize for testing for now REMOVE LATER
-    collection.delete_many(doc! { "losses": 0 }, None).unwrap();
-    let docs = vec![
-        User {
-            name: "Aaron".to_string(),
-            wins: 0,
-            losses: 0
-        },
-        User {
-            name: "Calvin".to_string(),
-            wins: 0,
-            losses: 0
-        },
-        User {
-            name: "Ryden".to_string(),
-            wins: 0,
-            losses: 0
-        }
-    ];
-    collection.insert_many(docs, None).unwrap();
+    // collection.delete_many(doc! { "losses": 0 }, None).unwrap();
+    // let docs = vec![
+    //     User {
+    //         name: "Aaron".to_string(),
+    //         wins: 0,
+    //         losses: 0
+    //     },
+    //     User {
+    //         name: "Calvin".to_string(),
+    //         wins: 0,
+    //         losses: 0
+    //     },
+    //     User {
+    //         name: "Ryden".to_string(),
+    //         wins: 0,
+    //         losses: 0
+    //     }
+    // ];
+    // collection.insert_many(docs, None).unwrap();
 
     //****************** NOTE: PUT WHATEVER QUERY YOU WANT HERE ******************* */
-    let cursor = collection.find(doc! { "wins": 0 }, None).unwrap();
+    let cursor = collection.find(doc! { "game_type": true }, None).unwrap();
 
-    let mut users = Vec::<User>::new();
+    let mut games = Vec::<Game>::new();
 
     for result in cursor {
-        let user = result.unwrap();
-        println!("title: {}", user.name);
-        println!("title: {}", user.wins);
-        println!("title: {}", user.losses);
-        // file.write_all(serde_json::to_string(&user).unwrap().as_bytes())?;
-        users.push(user);
+        let game = result.unwrap();
+        println!("id: {}", game.id);
+        println!("type: {}", game.game_type);
+        println!("p1: {}", game.player_1_name);
+        println!("p2: {}", game.player_2_name);
+        println!("p2isCPU: {}", game.player_2_is_computer);
+        println!("player1_won: {}", game.player1_won);
+        println!("date: {}", game.date);
+        games.push(game);
     }
 
-    rocket::serde::json::Json(users)
+    rocket::serde::json::Json(games)
 }
 
-impl User {
-    fn new(name: &str) -> User {
-        User {
-            name: name.to_string(),
-            wins: 0,
-            losses: 0
-        }
-    }
-}
-
-// fn wait_until_file_created() {
-//     let (tx, rx) = channel();
-//     let mut watcher = raw_watcher(tx).unwrap();
-//     // Watcher can't be registered for file that don't exists.
-//     // I use its parent directory instead, because I'm sure that it always exists
-//     // let file_dir = file_path.parent().unwrap();
-//     watcher.watch("../", RecursiveMode::NonRecursive).unwrap();
-//     // watcher.watch("../../../", RecursiveMode::Recursive).unwrap();
-//     // if !file_path.exists() {
-//     //     loop {
-//     //         match rx.recv_timeout(Duration::from_secs(2))? {
-//     //             RawEvent { path: Some(p), op: Ok(op::CREATE), .. } => 
-//     //                 if p == file_path {
-//     //                     break
-//     //                 },
-//     //             _ => continue,
-//     //         }
-//     //     }
-//     // }
-//     loop {
-//         match rx.recv() {
-//            Ok(RawEvent{path: Some(path), op: Ok(op), cookie}) => {
-//                println!("{:?} {:?} ({:?})", op, path, cookie);
-//             //    fs::remove_file("User.txt").unwrap();
-//            },
-//            Ok(event) => println!("broken event: {:?}", event),
-//            Err(e) => println!("watch error: {:?}", e),
+// impl User {
+//     fn new(name: &str) -> User {
+//         User {
+//             name: name.to_string(),
+//             wins: 0,
+//             losses: 0
 //         }
 //     }
 // }
@@ -158,53 +161,9 @@ impl Fairing for CORS {
     }
 }
 
+// prepare rocket for launch
 fn rocket() -> Result<rocket::Rocket<rocket::Build>, mongodb::error::Error> {
-    let mut client_options = ClientOptions::parse(
-        "mongodb+srv://myUser:myPassword@mycluster.zvnqo.mongodb.net/MyCluster?retryWrites=true&w=majority",
-    )?;
-    let client = Client::with_options(client_options)?;
-    for db_name in client.list_database_names(None, None)? {
-        println!("{}", db_name);
-    }
-    println!("");
-    let database = client.database("Connect4DB");
-    for collection_name in database.list_collection_names(None)? {
-        println!("{}", collection_name);
-    }
-    let collection = database.collection::<User>("test");
-    println!("connected");
-    collection.delete_many(doc! { "losses": 0 }, None)?;
-    let docs = vec![
-        User {
-            name: "Aaron".to_string(),
-            wins: 0,
-            losses: 0
-        },
-        User {
-            name: "Calvin".to_string(),
-            wins: 0,
-            losses: 0
-        },
-        User {
-            name: "Ryden".to_string(),
-            wins: 0,
-            losses: 0
-        }
-    ];
-    collection.insert_many(docs, None)?;
-
-    let mut file = File::create("User.txt")?;
-
-    let cursor = collection.find(doc! { "wins": 0 }, None)?;
-    for result in cursor {
-        let user = &result?;
-        println!("title: {}", user.name);
-        println!("title: {}", user.wins);
-        println!("title: {}", user.losses);
-        file.write_all(serde_json::to_string(&user).unwrap().as_bytes())?;
-    }
-
-    Ok(rocket::build().mount("/", routes![index]))
+    Ok(rocket::build().mount("/", routes![index, send_json, confirm_client_options, get_command]))
 }
 
 #[rocket::main]
