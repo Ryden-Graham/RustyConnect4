@@ -7,27 +7,18 @@ pub enum Difficulty {
     Medium,
     Hard,
 }
-use Difficulty::*;
+// use Difficulty::*;
 
 #[function_component(Connect4Computer)]
 pub fn connect4Computer() -> Html {
-
-    let player_name = use_state(|| "".to_string());
-    let display_state = use_state(|| "".to_string());
-    let is_game_on = use_state(|| false);
-    let disabled = use_state(|| false);
-    let start_game = {
-        is_game_on.set(true);
-        disabled.set(true);
-        display_state.set("block".to_string());
-    };
-    let end_game = {
-        is_game_on.set(false);
-        disabled.set(false);
-        display_state.set("none".to_string());
-    };
+    // let end_game = {
+    //     is_game_on.set(false);
+    //     disabled.set(false);
+    //     display_state.set("none".to_string());
+    // };
 
     html! {
+<<<<<<< HEAD
         // <div class="body-container" id="services">
         //     <div class="main-header">
         //         <b>{"Enter Your Name"}</b>
@@ -62,5 +53,14 @@ pub fn connect4Computer() -> Html {
         //             game_done_cbk={end_game}/>
         //     </div>
         // </div>
+=======
+        <div class="body-container" id="services">
+            <div class="main-header">
+                <b>{"Enter Your Name"}</b>
+            </div>
+            <hr class="header-divider"/>
+            <CanvasModel />
+        </div>
+>>>>>>> d0a47494c47b215ad47a45c593251fa74cbe4898
     }
 }
