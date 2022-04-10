@@ -26,6 +26,13 @@ pub fn sidebar() -> Html {
                 <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::HowToToot}>
                     <p class="header-page-text">{ "How to Play TOOT-OTTO" }</p>
                 </Link<AppRoute>>
+                <br/>
+                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::History}>
+                    <p class="header-page-text">{ "View Game History" }</p>
+                </Link<AppRoute>>
+                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::Scores}>
+                    <p class="header-page-text">{ "Score Board" }</p>
+                </Link<AppRoute>>
             </nav>
             <div class="sidebar-padder"/>
         </div>
