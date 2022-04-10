@@ -2,13 +2,20 @@
 
 pub mod app;
 pub mod routes;
+pub mod sidebar;
+
 pub mod home;
-pub mod history;
-pub mod scores;
+
 pub mod howToConnect4;
 pub mod connect4Computer;
-pub mod howToToot;
-pub mod sidebar;
+pub mod connect4Human;
+
+pub mod howToTootOtto;
+pub mod tootOttoComputer;
+pub mod tootOttoHuman;
+
+pub mod history;
+pub mod scores;
 
 use wasm_bindgen::prelude::*;
 

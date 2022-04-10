@@ -10,21 +10,30 @@ pub fn sidebar() -> Html {
         <div class="sidebar">
             <nav class="sidebar-container">
                 <div class="sidebar-title">
-                // <div class="w3-container">
                     <b>{"Play"}<br/> {"Connect4 / TOOT-OTTO"}</b>
                 </div>
                 <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::Home}>
                     <p class="header-page-text">{ "Home" }</p>
                 </Link<AppRoute>>
+                <br/>
                 <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::HowToConnect4}>
                     <p class="header-page-text">{ "How to Play Connect4" }</p>
                 </Link<AppRoute>>
                 <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::Connect4Computer}>
                     <p class="header-page-text">{ "Play Connect4 With a Computer" }</p>
                 </Link<AppRoute>>
+                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::Connect4Human}>
+                    <p class="header-page-text">{ "Play Connect4 With a Human" }</p>
+                </Link<AppRoute>>
                 <br/>
-                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::HowToToot}>
+                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::HowToTootOtto}>
                     <p class="header-page-text">{ "How to Play TOOT-OTTO" }</p>
+                </Link<AppRoute>>
+                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::TootOttoComputer}>
+                    <p class="header-page-text">{ "Play TOOT-OTTO With a Computer" }</p>
+                </Link<AppRoute>>
+                <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::TootOttoHuman}>
+                    <p class="header-page-text">{ "Play TOOT-OTTO With a Human" }</p>
                 </Link<AppRoute>>
                 <br/>
                 <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::History}>
