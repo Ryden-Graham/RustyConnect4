@@ -58,69 +58,104 @@ fn get_canvas_context() -> web_sys::CanvasRenderingContext2d {
 
 #[function_component(CanvasModel)]
 pub fn canvasModel(props: &CanvasProps) -> Html {
+    // Boolean check state variables
     let is_mounted = use_is_mounted();
+    let canvas_context_exists = use_state(|| false);
+    let is_game_on = use_state(|| false);
+    let disabled = use_state(|| false);
+    
+    // Complex state variables
     let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
-    // let test_element = use_state(|| "Button".to_string());
-    let test_number = use_state(|| 0);
+    let player_name = use_state(|| "".to_string());
+    let display_state = use_state(|| "".to_string());
+
+    let start_game = {
+        let is_game_on = is_game_on.clone();
+        let disabled = disabled.clone();
+        let display_state = display_state.clone();
+        let canvas_context = canvas_context.clone();
+
+        Callback::from(move |_| {
+            is_game_on.set(true);
+            disabled.set(true);
+            display_state.set("block".to_string());
+            
+            // Draw the gameboard
+            for i in 0..6 { // y coord
+                for j in 0..7 { // x coord
+                    canvas_context.as_ref().unwrap().begin_path();
+                    canvas_context.as_ref().unwrap().set_fill_style(&"#00bfff".into());
+                    canvas_context.as_ref().unwrap().fill_rect(
+                        (75 * j + 150) as f64,
+                        (75 * i) as f64,
+                        -100.0,
+                        100.0,
+                    );
+                    canvas_context.as_ref().unwrap().fill();
+                    canvas_context.as_ref().unwrap().set_fill_style(&"#ffffff".into());
+                    canvas_context.as_ref().unwrap().arc(
+                        (75 * j + 100) as f64,
+                        (75 * i + 50) as f64,
+                        25.0,
+                        0.0,
+                        2.0 * 3.14159265359,
+                    );
+                    canvas_context.as_ref().unwrap().fill();  
+                }
+            }
+            canvas_context.as_ref().unwrap().begin_path();
+            canvas_context.as_ref().unwrap().set_fill_style(&"#00bfff".into());
+            // canvas_context.as_ref().unwrap()
+            //     .arc(75.0, 75.0, 50.0, 0.0, 3.14 * 2.0)
+            //     .unwrap();
+            canvas_context.as_ref().unwrap().stroke();
+        })
+    };
 
     use_effect(move || {
-        // canvas_context.set(Some(get_canvas_context()));
+        if is_mounted() && !*canvas_context_exists {
+            let canvas_context_exists = canvas_context_exists.clone();
+            let canvas_context = canvas_context.clone();
+
+            canvas_context_exists.set(true);
+            canvas_context.set(Some(get_canvas_context()));
+        }
         move || ()
     });
-
-    let test_click = {
-        let test_number = test_number.clone();
-        let canvas_context = canvas_context.clone();
-        // let canvas_context = canvas_context.clone();
-        
-        Callback::from(move |_| {
-            if is_mounted() {
-                
-                // (*canvas_context).as_ref().unwrap().save();
-                // canvas_context.set(Some(get_canvas_context()));
-                // (*canvas_context).as_ref().unwrap().fill_text("black", 10.0, 50.0, None);
-                test_number.set(*test_number + 1);
-                canvas_context.set(Some(get_canvas_context()));
-                
-            } else { 
-                // document().get_element_by_id("canvas");
-                // canvas_context.set(Some(get_canvas_context()));
-            }
-        }) 
-    };
-
-    let test_more_click = {
-        let canvas_context = canvas_context.clone();
-        // let canvas_context = canvas_context.clone();
-        
-        Callback::from(move |_| {
-            canvas_context.as_ref().unwrap().begin_path();
-
-            // Draw the outer circle.
-            canvas_context.as_ref().unwrap()
-                .arc(75.0, 75.0, 50.0, 0.0, 3.14 * 2.0)
-                .unwrap();
-            canvas_context.as_ref().unwrap().stroke();
-            // (*canvas_context).as_ref().unwrap().fill_text("black", 10.0, 50.0, None);
-        }) 
-    };
     
     html! {
         <>
-            <button
-                class="button start-game"
-                type="button"
-                onclick={test_click}
-            >
-            {(*canvas_context).is_none()}
-            </button>
-            <button
-                class="button start-game"
-                type="button"
-                onclick={test_more_click}
-            >
-            {*test_number}
-            </button>
+            <div class="name-entry-container">
+                <input
+                    class="name-textbox"
+                    type="text"
+                    placeholder="Your Name"
+                />
+                <button
+                    class="button start-game"
+                    type="button"
+                    onclick={start_game}
+                    disabled={*disabled}
+                >
+                {"Start Game"}
+                </button>
+                <br />
+            </div>
+            if *is_game_on {
+                <div style={format!("display: {}", *display_state)}>
+                    <br/>
+                    <h4>{format!("New Game: {} Vs Computer", *player_name)}</h4>
+                    <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
+                    <br/>
+                    
+                        // canvas_id = "connect_computer" 
+                        // player1 = {*player_name.clone()}
+                        // player2 = "Computer" 
+                        // difficulty = self.difficulty,
+                        // game_done_cbk={end_game}/>
+                </div>
+            }
+            <br/>
             <canvas id="canvas" height="480" width="640"></canvas>
         </>
     }
