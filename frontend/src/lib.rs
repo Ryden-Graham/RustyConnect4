@@ -2,16 +2,25 @@
 
 pub mod app;
 pub mod routes;
+pub mod sidebar;
+
 pub mod home;
+
 pub mod howToConnect4;
 pub mod connect4Computer;
-pub mod howToToot;
+pub mod howToTootOtto;
 pub mod sidebar;
 pub mod canvas;
 pub mod ScoreBoard;
+pub mod connect4Human;
+
+pub mod tootOttoComputer;
+pub mod tootOttoHuman;
+
+pub mod history;
+pub mod scores;
 
 use wasm_bindgen::prelude::*;
-
 use app::App;
 
 // Use `wee_alloc` as the global allocator.

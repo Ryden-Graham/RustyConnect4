@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-#[function_component(HowToToot)]
+#[function_component(HowToTootOtto)]
 pub fn howToToot() -> Html {
     html! {
         <div class="body-container" id="services">
