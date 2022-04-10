@@ -8,9 +8,11 @@ pub mod home;
 
 pub mod howToConnect4;
 pub mod connect4Computer;
+pub mod howToTootOtto;
+pub mod canvas;
+pub mod ScoreBoard;
 pub mod connect4Human;
 
-pub mod howToTootOtto;
 pub mod tootOttoComputer;
 pub mod tootOttoHuman;
 
@@ -18,7 +20,6 @@ pub mod history;
 pub mod scores;
 
 use wasm_bindgen::prelude::*;
-
 use app::App;
 
 // Use `wee_alloc` as the global allocator.

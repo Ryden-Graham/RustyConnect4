@@ -99,7 +99,12 @@ body {
 }
 
 .button:active {
-    background-color: #b1b1b9
+    background-color: #b1b1b9;
+}
+
+.button:disabled {
+    background-color: #f4f4f6;
+    border: 1px solid #c7c7ce;
 }
 
 .start-game {

@@ -2288,15 +2288,18 @@ dependencies = [
  "chrono",
  "getrandom",
  "itertools",
+ "log 0.4.16",
  "rand",
  "reqwest",
  "serde",
+ "stdweb",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
  "web-sys",
  "wee_alloc",
  "yew",
+ "yew-hooks",
  "yew-router",
 ]
 
@@ -2630,6 +2633,8 @@ checksum = "d022496b16281348b52d0e30ae99e01a73d737b2f45d38fed4edf79f9325a1d5"
 dependencies = [
  "discard",
  "rustc_version",
+ "serde",
+ "serde_json",
  "stdweb-derive",
  "stdweb-internal-macros",
  "stdweb-internal-runtime",
@@ -3480,6 +3485,22 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
  "yew-macro",
+]
+
+[[package]]
+name = "yew-hooks"
+version = "0.1.53"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b977a90f42dc0d503c711974a4abac5b40f0ee7f928a478d7786aac090983e1"
+dependencies = [
+ "gloo",
+ "js-sys",
+ "log 0.4.16",
+ "serde",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "yew",
 ]
 
 [[package]]
