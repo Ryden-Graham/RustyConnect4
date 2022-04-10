@@ -62,7 +62,9 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     // Boolean check state variables
     let is_mounted = use_is_mounted();
     let canvas_context_exists = use_state(|| false);
+    let is_canvas_drawn = use_state(|| false);
     let is_game_on = use_state(|| false);
+    let is_listener_active = use_state(|| false);
     let disabled = use_state(|| false);
     
     // Complex state variables
@@ -75,10 +77,17 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     let canvas_context_add = canvas_context.clone();
     let add_piece = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
         canvas_context_add.as_ref().unwrap().begin_path();
-        canvas_context_add.as_ref().unwrap().set_fill_style(&"##ff4136".into());
+        canvas_context_add.as_ref().unwrap().set_fill_style(&"#ff4136".into());
+        // canvas_context_add.as_ref().unwrap().arc(
+        //     (75 * 6 + 100) as f64,
+        //     (75 * 5 + 50) as f64,
+        //     25.0,
+        //     0.0,
+        //     2.0 * 3.14159265359,
+        // );
         canvas_context_add.as_ref().unwrap().arc(
-            (75 * 7 + 100) as f64,
-            (75 * 6 + 50) as f64,
+            (event.offset_x()) as f64,
+            (event.offset_y()) as f64,
             25.0,
             0.0,
             2.0 * 3.14159265359,
@@ -89,10 +98,10 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
 
     let start_game = {
         let is_game_on = is_game_on.clone();
+        let is_canvas_drawn = is_canvas_drawn.clone();
         let disabled = disabled.clone();
         let display_state = display_state.clone();
         let canvas_context = canvas_context.clone();
-        let canvas = canvas.clone();
 
         Callback::from(move |_| {
             is_game_on.set(true);
@@ -131,12 +140,12 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
 
             canvas_context.as_ref().unwrap();
 
-            canvas.as_ref().unwrap().add_event_listener_with_callback("click", add_piece.as_ref().unchecked_ref());
-            // add_piece.forget();
+            is_canvas_drawn.set(true);
         })
     };
 
     use_effect(move || {
+
         if is_mounted() && !*canvas_context_exists {
             let canvas_context_exists = canvas_context_exists.clone();
             let canvas = canvas.clone();
@@ -145,6 +154,15 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             canvas_context_exists.set(true);
             canvas_context.set(Some(get_canvas_context()));
             canvas.set(Some(get_canvas_element()));
+        }
+
+        if *is_canvas_drawn && !*is_listener_active {
+            let is_listener_active = is_listener_active.clone();
+            is_listener_active.set(true);
+            let canvas = canvas.clone();
+
+            canvas.as_ref().unwrap().add_event_listener_with_callback("click", add_piece.as_ref().unchecked_ref());
+            add_piece.forget();
         }
         move || ()
     });
