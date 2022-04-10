@@ -28,39 +28,39 @@ pub fn connect4Computer() -> Html {
     };
 
     html! {
-        <div class="body-container" id="services">
-            <div class="main-header">
-                <b>{"Enter Your Name"}</b>
-            </div>
-            <hr class="header-divider"/>
-            <div class="name-entry-container">
-                <input
-                    class="name-textbox"
-                    type="text"
-                    placeholder="Your Name"
-                />
-                <button
-                    class="button start-game"
-                    type="button"
-                    onclick={start_game}
-                    disabled={*disabled}
-                >
-                {"Start Game"}
-                </button>
-                <br />
-            </div>
-            <div style={format!("display: {}", *display_state)}>
-                <br/>
-                <h4>{format!("New Game: {} Vs Computer", *player_name)}</h4>
-                <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
-                <br/>
-                <CanvasModel  
-                    canvas_id = "connect_computer" 
-                    player1 = {*player_name.clone()}
-                    player2 = "Computer" 
-                    // difficulty = self.difficulty,
-                    game_done_cbk={end_game}/>
-            </div>
-        </div>
+        // <div class="body-container" id="services">
+        //     <div class="main-header">
+        //         <b>{"Enter Your Name"}</b>
+        //     </div>
+        //     <hr class="header-divider"/>
+        //     <div class="name-entry-container">
+        //         <input
+        //             class="name-textbox"
+        //             type="text"
+        //             placeholder="Your Name"
+        //         />
+        //         <button
+        //             class="button start-game"
+        //             type="button"
+        //             onclick={start_game}
+        //             disabled={*disabled}
+        //         >
+        //         {"Start Game"}
+        //         </button>
+        //         <br />
+        //     </div>
+        //     <div style={format!("display: {}", *display_state)}>
+        //         <br/>
+        //         <h4>{format!("New Game: {} Vs Computer", *player_name)}</h4>
+        //         <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
+        //         <br/>
+        //         <CanvasModel  
+        //             canvas_id = "connect_computer" 
+        //             player1 = {*player_name.clone()}
+        //             player2 = "Computer" 
+        //             difficulty = self.difficulty,
+        //             game_done_cbk={end_game}/>
+        //     </div>
+        // </div>
     }
 }
