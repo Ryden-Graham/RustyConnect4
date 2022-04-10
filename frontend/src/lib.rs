@@ -9,7 +9,6 @@ pub mod home;
 pub mod howToConnect4;
 pub mod connect4Computer;
 pub mod howToTootOtto;
-pub mod sidebar;
 pub mod canvas;
 pub mod ScoreBoard;
 pub mod connect4Human;

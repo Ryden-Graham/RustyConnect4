@@ -132,7 +132,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             canvas_context.as_ref().unwrap();
 
             canvas.as_ref().unwrap().add_event_listener_with_callback("click", add_piece.as_ref().unchecked_ref());
-            add_piece.forget();
+            // add_piece.forget();
         })
     };
 
