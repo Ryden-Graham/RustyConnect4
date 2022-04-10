@@ -165,10 +165,10 @@ pub fn history() -> Html {
     html! {
         <div id="main" ng-controller="ScoreBoardCtrl">
 
-            <div class="body-container" id="services" style="margin-top:75px">
-                <h5 class="main-header"><b>
-                    {"Game History"}
-                </b></h5>
+            <div class="body-container" id="services">
+                <div class="main-header">
+                    <b>{"Game History"}</b>
+                </div>
                 <button class="button start-game" onclick={send_data}>{ "Add Game!!!" }</button>
                 <input
                     class="name-textbox"
@@ -183,7 +183,7 @@ pub fn history() -> Html {
                     oninput={updatep2name}
                 />
                 <button class="button start-game" onclick={nuke}>{ "NUKE DATABASE" }</button>
-                <hr style="width:50px;border:5px solid red" class="w3-round"/>
+                <hr class="header-divider"/>
                 
                 <div class="bottom-table">
                     <table>

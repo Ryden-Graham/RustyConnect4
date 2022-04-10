@@ -46,12 +46,13 @@ fn players_list(GameProps { games }: &GameProps) -> Html {
             .iter()
             .filter(|game| ((&game.player_1_name == player) && (game.player1_won == false)) || ((&game.player_2_name == player) && (game.player1_won == true)))
             .count();
+        let percentage = ((wins as f64) * 100000.0/(wins as f64 + losses as f64)).round()/1000.0;
         html! {
             <tr>
                 <td>{{player}}</td>
                 <td>{{wins}}</td>
                 <td>{{losses}}</td>
-                <td>{{(wins as f64)/(wins as f64 + losses as f64)}}</td>
+                <td>{{percentage}}</td>
             </tr>
         }
     }).collect()
@@ -119,11 +120,11 @@ pub fn history() -> Html {
     html! {
             <div id="main" ng-controller="ScoreBoardCtrl">
 
-                <div class="body-container" id="services" style="margin-top:75px">
-                    <h5 class="main-header"><b>
-                        {"Score Board"}
-                    </b></h5>
-                    <hr style="width:50px;border:5px solid red" class="w3-round"/>
+                <div class="body-container" id="services">
+                    <div class="main-header">
+                        <b>{"Score Board"}</b>
+                    </div>
+                    <hr class="header-divider"/>
                     <p class="sub-header">
                         {"Games Won by Computer"}
                     </p>
