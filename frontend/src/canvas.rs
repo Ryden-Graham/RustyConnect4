@@ -1,5 +1,8 @@
 use std::error::Error;
+use std::ptr::null;
 use stdweb::traits::*;
+use stdweb::web::Element;
+use stdweb::unstable::TryInto;
 use stdweb::web::html_element::CanvasElement;
 use stdweb::web::Date;
 use stdweb::web::FillRule;
@@ -30,11 +33,58 @@ pub struct CanvasProps {
     // pub game_done_call_back_click: Callback<i64>,
 }
 
+#[inline(always)]
+fn get_element_from_canvas() -> CanvasElement {
+    stdweb::unstable::TryInto::try_into(
+        document()
+            .get_element_by_id("canvas")
+            .unwrap())
+        .unwrap()
+}
+
+#[inline(always)]
+fn get_canvas_context() -> CanvasRenderingContext2d {
+    get_element_from_canvas().get_context().unwrap()
+}
+
 #[function_component(CanvasModel)]
 pub fn canvasModel(props: &CanvasProps) -> Html {
-    let canvas_element = use_state(|| document.getElementById("canvas"));
+    let canvas_context:UseStateHandle<Option<CanvasRenderingContext2d>> = use_state(|| None);
+    let canvas_initialized = use_state(|| false);
+
+    use_effect(move || {
+        // canvas_context.set(Some(get_canvas_context()));
+        move || ()
+    });
+
+    let test_click = {
+        let canvas_context = canvas_context.clone();
+        let canvas_initialized = canvas_initialized.clone();
+        // let canvas_context = canvas_context.clone();
+        
+        Callback::from(move |_| {
+            if *canvas_initialized {
+                // (*canvas_context).as_ref().unwrap().save();
+                (*canvas_context).as_ref().unwrap().fill_text("black", 10.0, 50.0, None);
+            } else { 
+                canvas_initialized.set(true);
+                canvas_context.set(Some(get_canvas_context()));
+            }
+        })
+        
+    };
+    
     html! {
+        <>
+            <button
+                class="button start-game"
+                type="button"
+                onclick={test_click}
+            >
+            {"Test Stuff"}
+            </button>
         <canvas id="canvas" height="480" width="640"></canvas>
+        </>
     }
 }
 

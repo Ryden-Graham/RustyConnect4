@@ -55,12 +55,13 @@ pub fn connect4Computer() -> Html {
                 </button>
                 <br />
             </div>
+            <CanvasModel />
             <div style={format!("display: {}", *display_state)}>
                 <br/>
                 <h4>{format!("New Game: {} Vs Computer", *player_name)}</h4>
                 <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
                 <br/>
-                <CanvasModel />
+                
                     // canvas_id = "connect_computer" 
                     // player1 = {*player_name.clone()}
                     // player2 = "Computer" 
