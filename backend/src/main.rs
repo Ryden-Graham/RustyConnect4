@@ -1,6 +1,7 @@
 use mongodb::{options::ClientOptions, sync::Client};
 use mongodb::bson::doc;
 use chrono::{DateTime, Utc};
+use rand::prelude::*;
 
 use rocket::{post, response::content, routes, serde::{Deserialize, Serialize}};
 use rocket::serde::json::Json;
@@ -55,16 +56,27 @@ fn get_command(command: String) -> String {
 
 #[post("/client", format = "json", data = "<game>")]
 fn send_json(game: Json<Game>) -> Json<Game> {
-    println!("id: {}", game.id);
+    // println!("id: {}", game.id);
     println!("type: {}", game.game_type);
     println!("p1: {}", game.player_1_name);
     println!("p2: {}", game.player_2_name);
     println!("p2isCPU: {}", game.player_2_is_computer);
     println!("player1_won: {}", game.player1_won);
     println!("date: {}", game.date);
+    let mut rng = rand::thread_rng();
+
+    let collection = get_game_database();
+
+    let mut id = 0;
+    loop {
+        id = rng.gen_range(0..u32::MAX) as u32;
+        if collection.find(doc! { "id": id }, None).unwrap().count() == 0 {
+            break;
+        }
+    }
 
     let mut games = vec![Game {
-        id: game.id,
+        id: id,
         game_type: game.game_type,
         player_1_name: game.player_1_name.clone(),
         player_2_name: game.player_2_name.clone(),
@@ -73,7 +85,6 @@ fn send_json(game: Json<Game>) -> Json<Game> {
         date: game.date
     }];
 
-    let collection = get_game_database();
     collection.insert_many(games, None).unwrap();
 
     // uncomment this and run to nuke database
@@ -113,19 +124,19 @@ fn index() -> Json<Vec<Game>> {
     // collection.insert_many(docs, None).unwrap();
 
     //****************** NOTE: PUT WHATEVER QUERY YOU WANT HERE ******************* */
-    let cursor = collection.find(doc! { "game_type": true }, None).unwrap();
+    let cursor = collection.find(doc! { }, None).unwrap();
 
     let mut games = Vec::<Game>::new();
 
     for result in cursor {
         let game = result.unwrap();
         println!("id: {}", game.id);
-        println!("type: {}", game.game_type);
-        println!("p1: {}", game.player_1_name);
-        println!("p2: {}", game.player_2_name);
-        println!("p2isCPU: {}", game.player_2_is_computer);
-        println!("player1_won: {}", game.player1_won);
-        println!("date: {}", game.date);
+        // println!("type: {}", game.game_type);
+        // println!("p1: {}", game.player_1_name);
+        // println!("p2: {}", game.player_2_name);
+        // println!("p2isCPU: {}", game.player_2_is_computer);
+        // println!("player1_won: {}", game.player1_won);
+        // println!("date: {}", game.date);
         games.push(game);
     }
 

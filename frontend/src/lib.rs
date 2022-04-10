@@ -3,6 +3,8 @@
 pub mod app;
 pub mod routes;
 pub mod home;
+pub mod history;
+pub mod scores;
 pub mod howToConnect4;
 pub mod connect4Computer;
 pub mod howToToot;

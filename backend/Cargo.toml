@@ -12,6 +12,7 @@ serde_json = "1.0.79"
 notify = "4.0.17"
 rocket_contrib = "0.4.10"
 chrono = { version = "0.4.19", features = ["serde"] }
+rand = "0.8.5"
 
 [dependencies.mongodb]
 version = "2.1.0"

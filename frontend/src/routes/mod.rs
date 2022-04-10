@@ -5,6 +5,8 @@ use crate::howToConnect4::HowToConnect4;
 use crate::connect4Computer::Connect4Computer;
 use crate::howToToot::HowToToot;
 use crate::home::Home;
+use crate::history::History;
+use crate::scores::Scores;
 
 #[derive(Clone, Routable, PartialEq, Debug)]
 pub enum AppRoute {
@@ -16,9 +18,13 @@ pub enum AppRoute {
     HowToToot,
     #[at("/")]
     Home,
+    #[at("/History")]
+    History,
+    #[at("/Scores")]
+    Scores,
     #[not_found]
     #[at("/404")]
-    NotFound,
+    NotFound
 }
 
 pub fn switch(route: &AppRoute) -> Html {
@@ -27,6 +33,8 @@ pub fn switch(route: &AppRoute) -> Html {
         AppRoute::HowToConnect4 => html! { <HowToConnect4 /> },
         AppRoute::Connect4Computer => html! { <Connect4Computer /> },
         AppRoute::HowToToot => html! { <HowToToot /> },
+        AppRoute::History => html! { <History />},
+        AppRoute::Scores => html! { <Scores />},
         AppRoute::NotFound => html! {
             <h1>{"404"}</h1>
         },
