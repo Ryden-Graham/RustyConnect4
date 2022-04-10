@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::ptr::null;
 use stdweb::traits::*;
-use stdweb::web::Element;
+use wasm_bindgen::JsCast;
 use stdweb::unstable::TryInto;
 use stdweb::web::html_element::CanvasElement;
 use stdweb::web::Date;
@@ -12,6 +12,7 @@ use stdweb::web::event::ClickEvent;
 // use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 use yew::{prelude::*, virtual_dom::VNode, Properties};
 use log;
+use yew_hooks::use_is_mounted;
 use crate::connect4Computer::Difficulty::{self, *};
 use crate::ScoreBoard::Game;
 
@@ -34,23 +35,33 @@ pub struct CanvasProps {
 }
 
 #[inline(always)]
-fn get_element_from_canvas() -> CanvasElement {
-    stdweb::unstable::TryInto::try_into(
-        document()
-            .get_element_by_id("canvas")
-            .unwrap())
+fn get_element_from_canvas() -> web_sys::HtmlCanvasElement {
+    web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .get_element_by_id("canvas")
+        .unwrap()
+        .dyn_into::<web_sys::HtmlCanvasElement>()
+        .map_err(|_| ())
         .unwrap()
 }
 
 #[inline(always)]
-fn get_canvas_context() -> CanvasRenderingContext2d {
-    get_element_from_canvas().get_context().unwrap()
+fn get_canvas_context() -> web_sys::CanvasRenderingContext2d {
+    get_element_from_canvas().get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<web_sys::CanvasRenderingContext2d>()
+        .unwrap()
 }
 
 #[function_component(CanvasModel)]
 pub fn canvasModel(props: &CanvasProps) -> Html {
-    let canvas_context:UseStateHandle<Option<CanvasRenderingContext2d>> = use_state(|| None);
-    let canvas_initialized = use_state(|| false);
+    let is_mounted = use_is_mounted();
+    let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
+    // let test_element = use_state(|| "Button".to_string());
+    let test_number = use_state(|| 0);
 
     use_effect(move || {
         // canvas_context.set(Some(get_canvas_context()));
@@ -58,20 +69,40 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     });
 
     let test_click = {
+        let test_number = test_number.clone();
         let canvas_context = canvas_context.clone();
-        let canvas_initialized = canvas_initialized.clone();
         // let canvas_context = canvas_context.clone();
         
         Callback::from(move |_| {
-            if *canvas_initialized {
+            if is_mounted() {
+                
                 // (*canvas_context).as_ref().unwrap().save();
-                (*canvas_context).as_ref().unwrap().fill_text("black", 10.0, 50.0, None);
-            } else { 
-                canvas_initialized.set(true);
+                // canvas_context.set(Some(get_canvas_context()));
+                // (*canvas_context).as_ref().unwrap().fill_text("black", 10.0, 50.0, None);
+                test_number.set(*test_number + 1);
                 canvas_context.set(Some(get_canvas_context()));
+                
+            } else { 
+                // document().get_element_by_id("canvas");
+                // canvas_context.set(Some(get_canvas_context()));
             }
-        })
+        }) 
+    };
+
+    let test_more_click = {
+        let canvas_context = canvas_context.clone();
+        // let canvas_context = canvas_context.clone();
         
+        Callback::from(move |_| {
+            canvas_context.as_ref().unwrap().begin_path();
+
+            // Draw the outer circle.
+            canvas_context.as_ref().unwrap()
+                .arc(75.0, 75.0, 50.0, 0.0, 3.14 * 2.0)
+                .unwrap();
+            canvas_context.as_ref().unwrap().stroke();
+            // (*canvas_context).as_ref().unwrap().fill_text("black", 10.0, 50.0, None);
+        }) 
     };
     
     html! {
@@ -81,9 +112,16 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 type="button"
                 onclick={test_click}
             >
-            {"Test Stuff"}
+            {(*canvas_context).is_none()}
             </button>
-        <canvas id="canvas" height="480" width="640"></canvas>
+            <button
+                class="button start-game"
+                type="button"
+                onclick={test_more_click}
+            >
+            {*test_number}
+            </button>
+            <canvas id="canvas" height="480" width="640"></canvas>
         </>
     }
 }

@@ -11,7 +11,6 @@ pub enum Difficulty {
 
 #[function_component(Connect4Computer)]
 pub fn connect4Computer() -> Html {
-
     let player_name = use_state(|| "".to_string());
     let display_state = use_state(|| "".to_string());
     let is_game_on = use_state(|| false);
