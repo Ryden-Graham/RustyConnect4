@@ -57,6 +57,7 @@ impl CanvasModel {
     
     pub fn reset(&mut self) {
         self.map = vec![vec![0; 7]; 6];
+        self.dummy_map = vec![vec![0; 7]; 6];
         self.paused = false;
         self.won = false;
         self.reject_click = false;
@@ -93,12 +94,12 @@ impl CanvasModel {
         self.canvas_context.as_ref().unwrap().save();
         self.canvas_context.as_ref().unwrap().set_font("14pt sans-serif");
         self.canvas_context.as_ref().unwrap().set_fill_style_color("#111");
-        self.canvas_context.as_ref().unwrap().fill_text(&print_msg, 130.0, 20.0, None);
+        self.canvas_context.as_ref().unwrap().fill_text(&print_msg, 150.0, 20.0, None);
         self.canvas_context.as_ref().unwrap().restore();
 
         let game = Game {
             gameNumber: String::new(),
-            gameType: String::from("Connect-4"),
+            gameType: String::from("TOOT-OTTO"),
             Player1Name: self.props.player1.as_ref().unwrap().clone(),
             Player2Name: self.props.player2.as_ref().unwrap().clone(),
             WinnerName: if winner > 0 {
@@ -182,39 +183,57 @@ impl CanvasModel {
         let mut down = 0;
         let mut down_right = 0;
         let mut up_right = 0;
+        let mut right1 = vec![0; 4];
+        let mut down1 = vec![0; 4];
+        let mut down_right1 = vec![0; 4];
+        let mut up_right1 = vec![0; 4];
     
         for i in 0..6 {
             for j in 0..7 {
-                right = 0;
-                down = 0;
-                down_right = 0;
-                up_right = 0;
+                for k in 0..4 {
+                    right1[k] = 0;
+                    down1[k] = 0;
+                    down_right1[k] = 0;
+                    up_right[k] = 0;
+                }
                 for k in 0..4 {
                     if j + k < 7 {
-                        right += self.map[i][j + k];
+                        right1[k] = self.dummy_map[i][j + k];
                     }
                     if i + k < 6 {
-                        down += self.map[i + k][j];
+                        down1[k] = self.dummy_map[i + k][j];
                     }
                     if i + k < 6 && j + k < 7 {
-                        down_right += self.map[i + k][j + k];
+                        down_right1[k] = self.dummy_map[i + k][j + k];
                     }
                     if i >= k && j + k < 7 {
-                        up_right += self.map[i - k][j + k];
+                        up_right1[k] = self.dummy_map[i - k][j + k];
                     }
                 }
     
-                if right.abs() == 4 {
-                    self.win(right);
-                } 
-                else if down.abs() == 4 {
-                    self.win(down);
-                } 
-                else if down_right.abs() == 4 {
-                    self.win(down_right);
-                } 
-                else if up_right.abs() == 4 {
-                    self.win(up_right);
+                if right1[0] === 'T' && right1[1] === 'O' && right1[2] === 'O' && right1[3] === 'T' {
+                    self.win(1);
+                }
+                else if right1[0] === 'O' && right1[1] === 'T' && right1[2] === 'T' && right1[3] === 'O' {
+                    self.win(-1);
+                }
+                else if down1[0] === 'T' && down1[1] ==='O' && down1[2] === 'O' && down1[3] === 'T' {
+                    self.win(1);
+                }
+                else if down1[0] === 'O' && down1[1] === 'T' && down1[2] === 'T' && down1[3] === 'O' {
+                    self.win(-1);
+                }
+                else if down_right1[0] === 'T' && down_right1[1] === 'O' && down_right1[2] === 'O' && down_right1[3] === 'T' {
+                    self.win(1);
+                }
+                else if down_right1[0] ==='O' && down_right1[1] === 'T' && down_right1[2] === 'T' && down_right1[3] === 'O' {
+                    self.win(-1);
+                }
+                else if up_right1[0] === 'T' && up_right1[1] ==='O' && up_right1[2] === 'O' && up_right1[3] === 'T' {
+                    self.win(1);
+                }
+                else if up_right1[0] === 'O' && up_right1[1] === 'T' && up_right1[2] === 'T' && up_right1[3] === 'O' {
+                    self.win(-1);
                 }
             }
         }
@@ -225,14 +244,16 @@ impl CanvasModel {
         }
     }
 
-    pub fn draw_circle(&self, x: u32, y: u32, r: u32, fill: &str, stroke: &str) {
+    pub fn draw_circle(&self, x: u32, y: u32, r: u32, fill: &str, stroke: &str, text: &str) {
         self.canvas_context.as_ref().unwrap().save();
-        self.canvas_context.as_ref().unwrap().set_fill_style_color(&fill);
-        self.canvas_context.as_ref().unwrap().set_stroke_style_color(&stroke);
+        self.canvas_context.as_ref().unwrap().set_fill_style_color(&color);
+        self.canvas_context.as_ref().unwrap().set_stroke_style_color(&outline);
         self.canvas_context.as_ref().unwrap().begin_path();
         self.canvas_context.as_ref().unwrap().arc(x as f64, y as f64, 25.0, 0.0, 2.0 * std::f64::consts::PI, false);
         self.canvas_context.as_ref().unwrap().fill(FillRule::NonZero);
+        self.canvas_context.as_ref().unwrap().set_font("bold 25px serif");
         self.canvas_context.as_ref().unwrap().restore();
+        self.canvas_context.as_ref().unwrap().fill_text(&text, x - 8.5, y + 8, None);
     }
 
     pub fn draw_mask(&self) {
@@ -252,12 +273,23 @@ impl CanvasModel {
     pub fn draw(&self) {
         for y in 0..6 {
             for x in 0..7 {
+                let mut text = "";
                 let mut fg_color = "transparent";
-                if self.map[y][x] >= 1 {
-                    fg_color = "#ff4136";
+                if self.map[y][x] >= 1 && self.dummyMap[y][x] == 'T' {
+                    fg_color = "#99ffcc";
+                    text = "T";
                 }
-                else if self.map[y][x] <= -1 {
-                    fg_color = "#ffff00";
+                else if self.map[y][x] >= 1 && self.dummyMap[y][x] == 'O' {
+                    fg_color = "#99ffcc";
+                    text = "O";
+                }
+                else if self.map[y][x] <= -1 && self.dummyMap[y][x] == 'T' {
+                    fg_color = "#ffff99";
+                    text = "T";
+                }
+                else if self.map[y][x] <= -1 && self.dummyMap[y][x] == 'O' {
+                    fg_color = "#ffff99";
+                    text = "O";
                 }
                 self.draw_circle((75 * x + 100) as u32, (75 * y + 50) as u32, 25, &fg_color, "black");
             }
@@ -269,18 +301,21 @@ impl CanvasModel {
     }
 
     pub fn animate(&mut self, column: usize, current_turn: i64, to_row: usize, cur_pos: usize, callback: bool) {
+        let mut text = "";
         let mut fg_color = "transparent";
         if current_turn >= 1 {
             fg_color = "#ff4136";
+            text = "T";
         }
         else if current_turn <= -1 {
             fg_color = "#ffff00";
+            text = "O";
         }
 
         if to_row * 75 >= cur_pos {
             self.clear();
             self.draw();
-            self.draw_circle((75 * column + 100) as u32, (cur_pos + 50) as u32, 25, &fg_color, "black");
+            self.draw_circle((75 * column + 100) as u32, (cur_pos + 50) as u32, 25, &fg_color, "black", &text);
             self.draw_mask();
 
             let cloned = self.animate_call_back_click.clone();
@@ -307,6 +342,7 @@ impl CanvasModel {
     }
 
     pub fn ai(&mut self, ai_move_value: i64) {
+        let mut dummy_label = vec!["T", "O"];
         let new_map = self.map.clone();
         let choice_val = self.max_state(ai_move_value, &new_map, 0, -100000000007, 100000000007);
 
