@@ -14,7 +14,7 @@ use rocket::fairing::{Fairing, Info, Kind};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Game {
     id: u32,
-    game_type: bool, 
+    game_type_is_c4: bool, 
     player_1_name: String,
     player_2_name: String,
     player_2_is_computer: bool,
@@ -35,7 +35,7 @@ fn get_game_database() -> mongodb::sync::Collection<Game> {
     for collection_name in database.list_collection_names(None).unwrap() {
         println!("{}", collection_name);
     }
-    database.collection::<Game>("test")
+    database.collection::<Game>("games")
 }
 
 #[post("/command", data = "<command>")]
@@ -57,7 +57,7 @@ fn get_command(command: String) -> String {
 #[post("/client", format = "json", data = "<game>")]
 fn send_json(game: Json<Game>) -> Json<Game> {
     // println!("id: {}", game.id);
-    println!("type: {}", game.game_type);
+    println!("type: {}", game.game_type_is_c4);
     println!("p1: {}", game.player_1_name);
     println!("p2: {}", game.player_2_name);
     println!("p2isCPU: {}", game.player_2_is_computer);
@@ -77,7 +77,7 @@ fn send_json(game: Json<Game>) -> Json<Game> {
 
     let mut games = vec![Game {
         id: id,
-        game_type: game.game_type,
+        game_type_is_c4: game.game_type_is_c4,
         player_1_name: game.player_1_name.clone(),
         player_2_name: game.player_2_name.clone(),
         player_2_is_computer: game.player_2_is_computer,
@@ -131,7 +131,7 @@ fn index() -> Json<Vec<Game>> {
     for result in cursor {
         let game = result.unwrap();
         println!("id: {}", game.id);
-        // println!("type: {}", game.game_type);
+        // println!("type: {}", game.game_type_is_c4);
         // println!("p1: {}", game.player_1_name);
         // println!("p2: {}", game.player_2_name);
         // println!("p2isCPU: {}", game.player_2_is_computer);

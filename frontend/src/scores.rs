@@ -2,11 +2,13 @@ use yew::prelude::*;
 use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use chrono::prelude::*;
+use std::iter::FromIterator;
+use itertools::Itertools;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 struct Game {
     id: u32,
-    game_type: bool, 
+    game_type_is_c4: bool, 
     player_1_name: String,
     player_2_name: String,
     player_2_is_computer: bool,
@@ -19,44 +21,65 @@ struct GameProps {
     games: Vec<Game>,
 }
 
-#[function_component(GamesList)]
-fn games_list(GameProps { games }: &GameProps) -> Html {
-    games.iter().map(|game| html! {
-        // <p>{format!("id: {}, type: {}, p1: {}, p2: {}, p2isCPU: {}, player1_won: {}, date: {}",
-        //     game.id,
-        //     game.game_type,
-        //     game.player_1_name,
-        //     game.player_2_name,
-        //     game.player_2_is_computer,
-        //     game.player1_won,
-        //     game.date
-        // )}</p>
+#[function_component(PlayerList)]
+fn players_list(GameProps { games }: &GameProps) -> Html {
+    let mut names: Vec<String> = games
+        .iter()
+        .flat_map(|game| match game.player_2_is_computer {
+            false => {
+                [game.player_1_name.clone(), game.player_2_name.clone()].into_iter()
+            },
+            true => {
+                [game.player_1_name.clone(), game.player_1_name.clone()].into_iter()
+            }
+        })
+        .collect();
+    names.sort();
+    names
+        .iter()
+        .unique().map(|player| {
+        let wins = games
+            .iter()
+            .filter(|game| ((&game.player_1_name == player) && (game.player1_won == true)) || ((&game.player_2_name == player) && (game.player1_won == false)))
+            .count();
+        let losses = games
+            .iter()
+            .filter(|game| ((&game.player_1_name == player) && (game.player1_won == false)) || ((&game.player_2_name == player) && (game.player1_won == true)))
+            .count();
+        html! {
+            <tr>
+                <td>{{player}}</td>
+                <td>{{wins}}</td>
+                <td>{{losses}}</td>
+                <td>{{(wins as f64)/(wins as f64 + losses as f64)}}</td>
+            </tr>
+        }
+    }).collect()
+}
+
+#[function_component(ComputerList)]
+fn computers_list(GameProps { games }: &GameProps) -> Html {
+    games.iter().filter(|game| (game.player_2_is_computer == true) && (game.player1_won == false)).map(|game| {
+        html! {
         <tr>
             <td>{{game.id}}</td>
-            <td>{{game.game_type}}</td>
-            <td>{{game.player_1_name.clone()}}</td>
-            <td>{{game.player_2_name.clone()}}</td>
-            <td>{{match game.player1_won {
+            <td>{{match game.game_type_is_c4 {
                 true => {
-                    game.player_1_name.clone()
+                    "Connect-4".to_string()
                 },
                 false => {
-                    game.player_2_name.clone()
+                    "Toot-Otto".to_string()
                 }
-            }}}</td>
+                }}}</td>
+            <td>{{game.player_2_name.clone()}}</td>
+            <td>{{game.player_1_name.clone()}}</td>
             <td>{game.date}</td>
         </tr>
-    }).collect()
+    }}).collect()
 }
 
 #[function_component(Scores)]
 pub fn history() -> Html {
-    // let value = use_state(|| 0);
-
-    // let onclickadd = {
-    //     let value = value.clone();
-    //     Callback::from(move |_| value.set(*value + 1))
-    // };
     let games_list = use_state(|| Vec::<Game>::new());
 
     {
@@ -77,86 +100,29 @@ pub fn history() -> Html {
             || ()
         }, ());
     }
-    
-    // let send_data = {
-    //     let games_list = games_list.clone();
-    //     let num_games = games_list.len();
-    //     let utc: DateTime<Utc> = Utc::now();
-    //     Callback::from(move |_| {
-    //         let new_game = Game {
-    //             id: num_games as u32 + 1,
-    //             game_type: true, 
-    //             player_1_name: "mr_NODED_abuser".to_string(),
-    //             player_2_name: "computer".to_string(),
-    //             player_2_is_computer: true,
-    //             player1_won: false,
-    //             date: utc
-    //         };
-    //         // games_list.push(new_game.clone());
-    //         let mut new_list = (*games_list).clone();
-    //         new_list.push(new_game.clone());
-    //         wasm_bindgen_futures::spawn_local(async move {
-    //             let sent = reqwest::Client::new()
-    //                 .post("http://127.0.0.1:7000/client")
-    //                 .json(&new_game)
-    //                 .send()
-    //                 .await
-    //                 .unwrap()
-    //                 .text()
-    //                 .await.unwrap();
-    //         });
-    //         games_list.set(new_list.to_vec());
-    //     })
-    // };
 
-    // let nuke = {
-    //     let games_list = games_list.clone();
-    //     Callback::from(move |_| {
-    //         wasm_bindgen_futures::spawn_local(async move {          
-    //             let sent = reqwest::Client::new()
-    //                 .post("http://127.0.0.1:7000/command")
-    //                 .body("nuke the world")
-    //                 .send()
-    //                 .await
-    //                 .unwrap()
-    //                 .text()
-    //                 .await.unwrap();
-    //         });
-    //         games_list.set(Vec::<Game>::new());
-    //     })
-    // };
+    let total_games = (*games_list)
+        .clone()
+        .iter()
+        .count();
+    let games_against_cpu = (*games_list)
+        .clone()
+        .iter()
+        .filter(|game| game.player_2_is_computer == true)
+        .count();
+    let games_cpu_won = (*games_list)
+        .clone()
+        .iter()
+        .filter(|game| (game.player_2_is_computer == true) && (game.player1_won == false))
+        .count();
 
     html! {
-            // <div class="w3-container" id="services" style="margin-top:75px">
-            //     <h5 class="w3-xxxlarge w3-text-red"><b>{"How to Play Connect 4"}</b></h5>
-            //     <hr style="width:50px;border:5px solid red" class="w3-round"/>
-            //     <p>
-            //         {"HISTORY PAGE"}
-            //     </p>
-            //     <br/>
-            //     <div><h5>{"To play Connect 4 follow the following steps:"}</h5></div>
-            //     <ul>
-
-            //         <li>{"A new game describes discs of which color belongs to which player"}</li>
-
-            //         <li>{"Click on the desired column on the game board to place your disc"}</li>
-
-            //         <li>{"Try to connect 4 of your colored discs either horizontally or vertically or diagonally"}</li>
-
-            //     </ul>
-            //     <br/>
-            //     <p>
-            //         {"For More information on Connect 4 click "}<a href="https://en.wikipedia.org/wiki/Connect_Four">{"here"}</a>
-            //     </p>
-            // </div>
             <div id="main" ng-controller="ScoreBoardCtrl">
 
                 <div class="body-container" id="services" style="margin-top:75px">
                     <h5 class="main-header"><b>
                         {"Score Board"}
                     </b></h5>
-                    // <button class="button start-game" onclick={send_data}>{ "Add Game!!!" }</button>
-                    // <button class="button start-game" onclick={nuke}>{ "NUKE DATABASE" }</button>
                     <hr style="width:50px;border:5px solid red" class="w3-round"/>
                     <p class="sub-header">
                         {"Games Won by Computer"}
@@ -168,7 +134,11 @@ pub fn history() -> Html {
                                 <th>{"Games Against Computer"}</th>
                                 <th>{"Games Computer Won"}</th>
                             </tr>
-                            // <GamesList games={(*games_list).clone()}/>
+                            <tr>
+                                <th>{total_games}</th>
+                                <th>{games_against_cpu}</th>
+                                <th>{games_cpu_won}</th>
+                            </tr>
                         </table>      
                     </div>
                     <br/>
@@ -184,7 +154,7 @@ pub fn history() -> Html {
                                 <th>{"Played Against"}</th>
                                 <th>{"When Played"}</th>
                             </tr>
-                            // <GamesList games={(*games_list).clone()}/>
+                            <ComputerList games={(*games_list).clone()}/>
                         </table>      
                     </div>
                     <br/>
@@ -199,7 +169,7 @@ pub fn history() -> Html {
                                 <th>{"Losses"}</th>
                                 <th>{"Win Percentage"}</th>
                             </tr>
-                            // <GamesList games={(*games_list).clone()}/>
+                            <PlayerList games={(*games_list).clone()}/>
                         </table>      
                     </div>
                 </div>
