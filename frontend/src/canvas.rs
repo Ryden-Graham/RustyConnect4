@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::ptr::null;
 use stdweb::traits::*;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use stdweb::unstable::TryInto;
 use stdweb::web::html_element::CanvasElement;
@@ -35,7 +36,7 @@ pub struct CanvasProps {
 }
 
 #[inline(always)]
-fn get_element_from_canvas() -> web_sys::HtmlCanvasElement {
+fn get_canvas_element() -> web_sys::HtmlCanvasElement {
     web_sys::window()
         .unwrap()
         .document()
@@ -49,7 +50,7 @@ fn get_element_from_canvas() -> web_sys::HtmlCanvasElement {
 
 #[inline(always)]
 fn get_canvas_context() -> web_sys::CanvasRenderingContext2d {
-    get_element_from_canvas().get_context("2d")
+    get_canvas_element().get_context("2d")
         .unwrap()
         .unwrap()
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
@@ -66,14 +67,32 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     
     // Complex state variables
     let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
+    let canvas:UseStateHandle<Option<web_sys::HtmlCanvasElement>> = use_state(|| None);
     let player_name = use_state(|| "".to_string());
     let display_state = use_state(|| "".to_string());
+
+    // Add piece
+    let canvas_context_add = canvas_context.clone();
+    let add_piece = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+        canvas_context_add.as_ref().unwrap().begin_path();
+        canvas_context_add.as_ref().unwrap().set_fill_style(&"##ff4136".into());
+        canvas_context_add.as_ref().unwrap().arc(
+            (75 * 7 + 100) as f64,
+            (75 * 6 + 50) as f64,
+            25.0,
+            0.0,
+            2.0 * 3.14159265359,
+        );
+        canvas_context_add.as_ref().unwrap().fill(); 
+        // canvas_context_add.as_ref().unwrap().move_to(event.offset_x() as f64, event.offset_y() as f64);
+    }) as Box<dyn FnMut(_)>);
 
     let start_game = {
         let is_game_on = is_game_on.clone();
         let disabled = disabled.clone();
         let display_state = display_state.clone();
         let canvas_context = canvas_context.clone();
+        let canvas = canvas.clone();
 
         Callback::from(move |_| {
             is_game_on.set(true);
@@ -100,25 +119,32 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                         0.0,
                         2.0 * 3.14159265359,
                     );
-                    canvas_context.as_ref().unwrap().fill();  
+                    canvas_context.as_ref().unwrap().fill(); 
                 }
             }
+            // Remove black outline on final circle
             canvas_context.as_ref().unwrap().begin_path();
             canvas_context.as_ref().unwrap().set_fill_style(&"#00bfff".into());
-            // canvas_context.as_ref().unwrap()
-            //     .arc(75.0, 75.0, 50.0, 0.0, 3.14 * 2.0)
-            //     .unwrap();
+
+            // Draw
             canvas_context.as_ref().unwrap().stroke();
+
+            canvas_context.as_ref().unwrap();
+
+            canvas.as_ref().unwrap().add_event_listener_with_callback("click", add_piece.as_ref().unchecked_ref());
+            // add_piece.forget();
         })
     };
 
     use_effect(move || {
         if is_mounted() && !*canvas_context_exists {
             let canvas_context_exists = canvas_context_exists.clone();
+            let canvas = canvas.clone();
             let canvas_context = canvas_context.clone();
 
             canvas_context_exists.set(true);
             canvas_context.set(Some(get_canvas_context()));
+            canvas.set(Some(get_canvas_element()));
         }
         move || ()
     });
