@@ -36,17 +36,22 @@ body {
 
 .sidebar-container {
     z-index: 3;
-    width: 350px;
+    width: 20vw;
     height: 100%;
     font-weight: bold;
     display: block !important;
     color: white !important;
     background-color: #272090 !important ;
-    padding: 8px 16px !important;
+    padding: 2vh 1vw !important;
     font-size: 18px !important;
     top: 0;
     position: fixed !important;
     overflow: auto;
+    line-height: 1;
+}
+
+.sidebar-bottom {
+    height: 50vh;
 }
 
 .sidebar-page-link {
@@ -62,17 +67,17 @@ body {
 }
 
 .sidebar-padder {
-    margin-left:390px;
-    margin-right:40px
+    margin-left:25vw;
+    margin-right:40px;
 }
 
 .sidebar-title {
-    padding: 0.01em 16px;
-    padding-top: 64px;
-    padding-bottom: 64px;
+    padding: 0.01em 2vh;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
     font-weight: 400;
-    margin: 10px 0;
-    font-size: 24px;
+    margin: 2vh 0;
+    font-size: 36px;
     font-family: "Segoe UI", Arial, sans-serif;
 }
 

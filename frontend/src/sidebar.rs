@@ -42,6 +42,7 @@ pub fn sidebar() -> Html {
                 <Link<AppRoute> classes={classes!("sidebar-page-link")} to={AppRoute::Scores}>
                     <p class="header-page-text">{ "Score Board" }</p>
                 </Link<AppRoute>>
+                <div class="sidebar-bottom"/>
             </nav>
             <div class="sidebar-padder"/>
         </div>

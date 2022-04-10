@@ -120,7 +120,7 @@ pub fn history() -> Html {
     html! {
             <div id="main" ng-controller="ScoreBoardCtrl">
 
-                <div class="body-container" id="services" style="margin-top:75px">
+                <div class="body-container" id="services">
                     <div class="main-header">
                         <b>{"Score Board"}</b>
                     </div>
