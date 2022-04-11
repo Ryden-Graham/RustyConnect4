@@ -15,9 +15,10 @@ use yew::{prelude::*, virtual_dom::VNode, Properties};
 use log;
 use yew_hooks::use_is_mounted;
 use crate::connect4Computer::Difficulty::{self, *};
-use crate::ScoreBoard::Game;
 use stdweb::js;
 use wasm_bindgen::UnwrapThrowExt;
+use chrono::{DateTime, Utc};
+use serde::{Serialize, Deserialize};
 use web_sys::HtmlInputElement;
 
 // macro_rules! enclose {
@@ -28,6 +29,17 @@ use web_sys::HtmlInputElement;
 //         }
 //     };
 // }
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+struct Game {
+    id: u32,
+    game_type_is_c4: bool, 
+    player_1_name: String,
+    player_2_name: String,
+    player_2_is_computer: bool,
+    player1_won: u32,
+    date: DateTime<Utc>
+}
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct CanvasProps {
@@ -78,7 +90,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     let display_state = use_state(|| "".to_string());
     let game_map = use_state(|| vec![vec![0; 7]; 6]);
     let player_name_1 = use_state(|| "".to_string());
-    let player_name_2 = use_state(|| "Computer".to_string());
+    let pending_name_1 = use_state(|| "".to_string());
     let current_turn = use_state(|| 0);
     let difficulty = use_state(|| Difficulty::Hard);
 
@@ -87,6 +99,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     let drop_disk_1 = {
         let game_map = game_map.clone();
         let ai_move = ai_move.clone();
+        let current_turn = current_turn.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -104,12 +117,14 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
+            current_turn.set((*current_turn) + 1);
         })
     };
 
     let drop_disk_2 = {
         let game_map = game_map.clone();
         let ai_move = ai_move.clone();
+        let current_turn = current_turn.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -127,12 +142,14 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
+            current_turn.set((*current_turn) + 1);
         })
     };
 
     let drop_disk_3 = {
         let game_map = game_map.clone();
         let ai_move = ai_move.clone();
+        let current_turn = current_turn.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -150,12 +167,14 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
+            current_turn.set((*current_turn) + 1);
         })
     };
 
     let drop_disk_4 = {
         let game_map = game_map.clone();
         let ai_move = ai_move.clone();
+        let current_turn = current_turn.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -173,12 +192,14 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
+            current_turn.set((*current_turn) + 1);
         })
     };
 
     let drop_disk_5 = {
         let game_map = game_map.clone();
         let ai_move = ai_move.clone();
+        let current_turn = current_turn.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -196,12 +217,14 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
+            current_turn.set((*current_turn) + 1);
         })
     };
 
     let drop_disk_6 = {
         let game_map = game_map.clone();
         let ai_move = ai_move.clone();
+        let current_turn = current_turn.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -219,12 +242,14 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
+            current_turn.set((*current_turn) + 1);
         })
     };
 
     let drop_disk_7 = {
         let game_map = game_map.clone();
         let ai_move = ai_move.clone();
+        let current_turn = current_turn.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -242,6 +267,18 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
+            current_turn.set((*current_turn) + 1);
+        })
+    };
+
+    let updatep1name = {
+        let pending_name_1 = pending_name_1.clone();
+        Callback::from(move |name_event: InputEvent| {
+            // DOM query from: https://stackoverflow.com/questions/71690906/how-to-query-and-update-the-dom-with-yew
+            let event: Event = name_event.dyn_into().unwrap_throw();
+            let input_elem: HtmlInputElement = event.target().unwrap_throw().dyn_into().unwrap_throw();
+            let value = input_elem.value();
+            pending_name_1.set(value);
         })
     };
 
@@ -268,6 +305,8 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
         let disabled = disabled.clone();
         let display_state = display_state.clone();
         let canvas_context = canvas_context.clone();
+        let player_name_1 = player_name_1.clone();
+        let pending_name_1 = pending_name_1.clone();
 
         Callback::from(move |_| {
             is_game_on.set(true);
@@ -282,6 +321,9 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             canvas_context.as_ref().unwrap().stroke();
 
             canvas_context.as_ref().unwrap();
+
+            // Lock in name
+            player_name_1.set((*pending_name_1).clone().to_string());
 
             is_canvas_drawn.set(true);
         })
@@ -509,6 +551,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             }
             game_map.set(game_map_clone);
             ai_move.set(false);
+            current_turn.set((*current_turn) + 1);
             // let mut done = action(choice as usize, true);
         
             // if fail, then random
@@ -531,15 +574,19 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             let mut msg = String::new();
 
             let player_name_1 = player_name_1.clone();
-            let player_name_2 = player_name_2.clone();
+            let player_name_2 = "computer";
+            let mut winner_num = 0;
             if winner > 0 {
                 msg = format!("{} wins", (*player_name_1));
+                winner_num = 1;
             }
             else if winner < 0 {
-                msg = format!("{} wins", (*player_name_2));
+                msg = format!("{} wins", player_name_2);
+                winner_num = 2;
             }
             else {
                 msg = "It's a draw".to_string();
+                winner_num = 0;
             }
         
             let print_msg = format!("{} - Click on game board to reset", msg);
@@ -551,6 +598,29 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             canvas_context.as_ref().unwrap().fill_text(&print_msg, 130.0, 20.0);
             canvas_context.as_ref().unwrap().restore();
         
+            // send game to database
+            let utc: DateTime<Utc> = Utc::now();
+            let new_game = Game {
+                id: 0,
+                game_type_is_c4: true, 
+                player_1_name: (*player_name_1).clone().to_string(),
+                player_2_name: player_name_2.clone().to_string(),
+                player_2_is_computer: true,
+                player1_won: winner_num,
+                date: utc
+            };
+            
+            wasm_bindgen_futures::spawn_local(async move {
+                reqwest::Client::new()
+                    .post("http://127.0.0.1:7000/client")
+                    .json(&new_game)
+                    .send()
+                    .await
+                    .unwrap()
+                    .text()
+                    .await.unwrap();
+            });
+
             // let game = Game {
             //     gameNumber: String::new(),
             //     gameType: String::from("Connect-4"),
@@ -704,6 +774,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                     class="name-textbox"
                     type="text"
                     placeholder="Your Name"
+                    oninput={updatep1name}
                 />
                 <button
                     class="button start-game"
