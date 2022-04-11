@@ -12,21 +12,10 @@ use stdweb::web::event::ClickEvent;
 use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use web_sys::HtmlInputElement;
-// use yew::format::Json;
-// use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 use yew::{prelude::*, virtual_dom::VNode, Properties};
 use log;
 use yew_hooks::use_is_mounted;
 use crate::connect4Computer::Difficulty::{self, *};
-
-// macro_rules! enclose {
-//     ( ($( $x:ident ),*) $y:expr ) => {
-//         {
-//             $(let $x = $x.clone();)*
-//             $y
-//         }
-//     };
-// }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 struct Game {
@@ -37,15 +26,6 @@ struct Game {
     player_2_is_computer: bool,
     player1_won: u32,
     date: DateTime<Utc>
-}
-
-#[derive(Clone, PartialEq, Properties)]
-pub struct CanvasProps {
-    // pub player1: Option<String>,
-    // pub player2: Option<String>,
-    // pub difficulty: Difficulty,
-    // pub canvas_id: Option<String>,
-    // pub game_done_call_back_click: Callback<i64>,
 }
 
 #[inline(always)]
@@ -79,15 +59,18 @@ pub fn canvasHuman() -> Html {
     let is_game_on = use_state(|| false);
     let disabled = use_state(|| false);
     let game_won = use_state(|| false);
+    let colorblind_enabled = use_state(|| false);
+    let colorblind_enabled_display = use_state(|| false);
     
     // Complex state variables
     let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
     let canvas:UseStateHandle<Option<web_sys::HtmlCanvasElement>> = use_state(|| None);
-    let player_name = use_state(|| "".to_string());
     let display_state = use_state(|| "".to_string());
     let game_map = use_state(|| vec![vec![0; 7]; 6]);
     let player_name_1 = use_state(|| "".to_string());
     let player_name_2 = use_state(|| "".to_string());
+    let player_name_1_display = use_state(|| "".to_string());
+    let player_name_2_display = use_state(|| "".to_string());
     let pending_name_1 = use_state(|| "".to_string());
     let pending_name_2 = use_state(|| "".to_string());
     let current_turn = use_state(|| 0);
@@ -109,11 +92,11 @@ pub fn canvasHuman() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -132,11 +115,11 @@ pub fn canvasHuman() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -155,11 +138,11 @@ pub fn canvasHuman() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -178,11 +161,11 @@ pub fn canvasHuman() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -201,11 +184,11 @@ pub fn canvasHuman() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -224,11 +207,11 @@ pub fn canvasHuman() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -247,11 +230,11 @@ pub fn canvasHuman() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -277,6 +260,15 @@ pub fn canvasHuman() -> Html {
         })
     };
 
+    let toggle_colorblind = {
+        let colorblind_enabled = colorblind_enabled.clone();
+        let colorblind_enabled_display = colorblind_enabled_display.clone();
+        Callback::from(move |_| {
+            colorblind_enabled.set(!(*colorblind_enabled));
+            colorblind_enabled_display.set(!(*colorblind_enabled));
+        })
+    };
+
     let start_game = {
         let is_game_on = is_game_on.clone();
         let is_canvas_drawn = is_canvas_drawn.clone();
@@ -287,6 +279,8 @@ pub fn canvasHuman() -> Html {
         let pending_name_1 = pending_name_1.clone();
         let player_name_2 = player_name_2.clone();
         let pending_name_2 = pending_name_2.clone();
+        let player_name_1_display = player_name_1_display.clone();
+        let player_name_2_display = player_name_2_display.clone();
         Callback::from(move |_| {
             is_game_on.set(true);
             disabled.set(true);
@@ -304,6 +298,8 @@ pub fn canvasHuman() -> Html {
             // Lock in names
             player_name_1.set((*pending_name_1).clone().to_string());
             player_name_2.set((*pending_name_2).clone().to_string());
+            player_name_1_display.set((*pending_name_1).clone().to_string());
+            player_name_2_display.set((*pending_name_2).clone().to_string());
 
             is_canvas_drawn.set(true);
         })
@@ -313,12 +309,8 @@ pub fn canvasHuman() -> Html {
 
         // Have a player win
         let win = |winner: i64| {
-            // let paused = paused.clone();
-            // paused.set(true);
             let game_won = game_won.clone();
             game_won.set(true);
-            // let reject_click = reject_click.clone();
-            // reject_click.set(false);
             let mut msg = String::new();
 
             let player_name_1 = player_name_1.clone();
@@ -337,13 +329,13 @@ pub fn canvasHuman() -> Html {
                 winner_num = 0;
             }
         
-            let print_msg = format!("{} - Click on game board to reset", msg);
+            let print_msg = format!("{}", msg);
             
             let canvas_context = canvas_context.clone();
             canvas_context.as_ref().unwrap().save();
             canvas_context.as_ref().unwrap().set_font("14pt sans-serif");
             canvas_context.as_ref().unwrap().set_fill_style(&"#111".into());
-            canvas_context.as_ref().unwrap().fill_text(&print_msg, 130.0, 20.0);
+            canvas_context.as_ref().unwrap().fill_text(&print_msg, 300.0, 20.0);
             canvas_context.as_ref().unwrap().restore();
 
             // send game to database
@@ -368,40 +360,6 @@ pub fn canvasHuman() -> Html {
                     .text()
                     .await.unwrap();
             });
-        
-            // let game = Game {
-            //     gameNumber: String::new(),
-            //     gameType: String::from("Connect-4"),
-            //     Player1Name: self.props.player1.as_ref().unwrap().clone(),
-            //     Player2Name: self.props.player2.as_ref().unwrap().clone(),
-            //     WinnerName: if winner > 0 {
-            //         self.props.player1.as_ref().unwrap().clone()
-            //     }
-            //     else if winner < 0 {
-            //         self.props.player2.as_ref().unwrap().clone()
-            //     }
-            //     else {
-            //         String::from("Draw")
-            //     },
-            //     GameDate: Date::now() as u64,
-            // };
-        
-            // // construct callback
-            // let callback = self
-            //     .link
-            //     .callback(move |response: Response<Result<String, Error>>| {
-            //         log::info!("successfully saved!");
-            //         Message::Ignore
-            //     });
-        
-            // // construct request
-            // let request = Request::post("/games")
-            //     .header("Content-Type", "application/json")
-            //     .body(Json(&game))
-            //     .unwrap();
-        
-            // // send the request
-            // self.fetch_task = self.fetch_service.fetch(request, callback).ok();
         };
 
         let check = || {
@@ -485,10 +443,24 @@ pub fn canvasHuman() -> Html {
                             "#ffffff"
                         },
                         1 => {
-                            "#ff4136"
+                            match (*colorblind_enabled).clone() {
+                                true => {
+                                    "#5D3A9B"
+                                },
+                                false => {
+                                    "#ff4136"
+                                }
+                            }
                         }
                         _ => {
-                            "#ffff00"
+                            match (*colorblind_enabled).clone() {
+                                true => {
+                                    "#E66100"
+                                },
+                                false => {
+                                    "#ffff00"
+                                }
+                            }
                         }
                     };
                     canvas_context.as_ref().unwrap().set_fill_style(&circle_color.into());
@@ -536,12 +508,35 @@ pub fn canvasHuman() -> Html {
                 {"Start Game"}
                 </button>
                 <br />
+                <button
+                    class="button toggle-colorblind"
+                    type="button"
+                    onclick={toggle_colorblind}
+                >
+                {"Toggle Colorblind Mode"}
+                </button>
             </div>
             if *is_game_on {
                 <div style={format!("display: {}", *display_state)}>
                     <br/>
-                    <h4>{format!("New Game: {} Vs Computer", *player_name)}</h4>
-                    <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
+                    <h4>{format!("New Game: {} Vs {}", (*player_name_1_display).clone(), (*player_name_2_display).clone())}</h4>
+                    <small>{format!("(Disc Colors: {} - ", (*player_name_1_display).clone())} <b>{
+                        match (*colorblind_enabled_display).clone() {
+                            true => {
+                                "Purple"
+                            },
+                            false => {
+                                "Red"
+                            }
+                    }}</b> {format!("   and    {} - ", (*player_name_2_display).clone())} <b>{
+                        match (*colorblind_enabled_display).clone() {
+                            true => {
+                                "Orange"
+                            },
+                            false => {
+                                "Yellow"
+                            }
+                    }}</b>{")"}</small>
                     <br/>
                 </div>
             }
