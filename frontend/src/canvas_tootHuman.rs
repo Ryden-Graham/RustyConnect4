@@ -490,13 +490,13 @@ pub fn canvasTOOTHuman() -> Html {
             let dummy_map = dummy_map.clone();
             for i in 0..6 {
                 for j in 0..7 {
-                    // for k in 0..4 {
-                    //     right1[k] = 0;
-                    //     down1[k] = 0;
-                    //     down_right1[k] = 0;
-                    //     up_right1[k] = 0;
-                    // }
-                    for k in 0..=3 {
+                    for k in 0..4 {
+                        right1[k] = 0;
+                        down1[k] = 0;
+                        down_right1[k] = 0;
+                        up_right1[k] = 0;
+                    }
+                    for k in 0..4 {
                         if j + k < 7 {
                             right1[k] = (*dummy_map)[i][j + k];
                         }
