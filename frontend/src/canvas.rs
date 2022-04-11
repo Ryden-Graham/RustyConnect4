@@ -72,29 +72,50 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     let canvas:UseStateHandle<Option<web_sys::HtmlCanvasElement>> = use_state(|| None);
     let player_name = use_state(|| "".to_string());
     let display_state = use_state(|| "".to_string());
+    let colorblind_enabled = use_state(|| false);
+
+    let toggle_colorblind = {
+        let colorblind_enabled = colorblind_enabled.clone();
+        Callback::from(move |_| {
+            colorblind_enabled.set(!(*colorblind_enabled));
+        })
+    };
 
     // Add piece
     let canvas_context_add = canvas_context.clone();
-    let add_piece = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
-        canvas_context_add.as_ref().unwrap().begin_path();
-        canvas_context_add.as_ref().unwrap().set_fill_style(&"#ff4136".into());
-        // canvas_context_add.as_ref().unwrap().arc(
-        //     (75 * 6 + 100) as f64,
-        //     (75 * 5 + 50) as f64,
-        //     25.0,
-        //     0.0,
-        //     2.0 * 3.14159265359,
-        // );
-        canvas_context_add.as_ref().unwrap().arc(
-            (event.offset_x()) as f64,
-            (event.offset_y()) as f64,
-            25.0,
-            0.0,
-            2.0 * 3.14159265359,
-        );
-        canvas_context_add.as_ref().unwrap().fill(); 
-        // canvas_context_add.as_ref().unwrap().move_to(event.offset_x() as f64, event.offset_y() as f64);
-    }) as Box<dyn FnMut(_)>);
+    let add_piece = {
+        let colorblind_enabled = colorblind_enabled.clone();
+        Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+            canvas_context_add.as_ref().unwrap().begin_path();
+            canvas_context_add.as_ref().unwrap().set_fill_style({
+                let mut color = match (*colorblind_enabled).clone() {
+                    true => {
+                        "#5D3A9B"
+                    },
+                    false => {
+                        "#ff4136"
+                    }
+                };
+                &color.into()
+            });
+            // canvas_context_add.as_ref().unwrap().arc(
+            //     (75 * 6 + 100) as f64,
+            //     (75 * 5 + 50) as f64,
+            //     25.0,
+            //     0.0,
+            //     2.0 * 3.14159265359,
+            // );
+            canvas_context_add.as_ref().unwrap().arc(
+                (event.offset_x()) as f64,
+                (event.offset_y()) as f64,
+                25.0,
+                0.0,
+                2.0 * 3.14159265359,
+            );
+            canvas_context_add.as_ref().unwrap().fill(); 
+            // canvas_context_add.as_ref().unwrap().move_to(event.offset_x() as f64, event.offset_y() as f64);
+        }) as Box<dyn FnMut(_)>)
+    };
 
     let start_game = {
         let is_game_on = is_game_on.clone();
@@ -183,13 +204,34 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 >
                 {"Start Game"}
                 </button>
+                <button
+                    class="button toggle-colorblind"
+                    type="button"
+                    onclick={toggle_colorblind}
+                >
+                {"Toggle Colorblind Mode"}
+                </button>
                 <br />
             </div>
             if *is_game_on {
                 <div style={format!("display: {}", *display_state)}>
                     <br/>
                     <h4>{format!("New Game: {} Vs Computer", *player_name)}</h4>
-                    <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
+                    <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{match (*colorblind_enabled).clone() {
+                        true => {
+                            "Orange"
+                        },
+                        false => {
+                            "Red"
+                        }
+                    }}</b> {"   and    Computer - "} <b>{match (*colorblind_enabled).clone() {
+                        true => {
+                            "Purple"
+                        },
+                        false => {
+                            "Yellow"
+                        }
+                    }}</b>{")"}</small>
                     <br/>
                     
                         // canvas_id = "connect_computer" 
