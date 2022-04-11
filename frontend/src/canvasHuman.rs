@@ -12,21 +12,10 @@ use stdweb::web::event::ClickEvent;
 use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use web_sys::HtmlInputElement;
-// use yew::format::Json;
-// use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 use yew::{prelude::*, virtual_dom::VNode, Properties};
 use log;
 use yew_hooks::use_is_mounted;
 use crate::connect4Computer::Difficulty::{self, *};
-
-// macro_rules! enclose {
-//     ( ($( $x:ident ),*) $y:expr ) => {
-//         {
-//             $(let $x = $x.clone();)*
-//             $y
-//         }
-//     };
-// }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 struct Game {
@@ -37,15 +26,6 @@ struct Game {
     player_2_is_computer: bool,
     player1_won: u32,
     date: DateTime<Utc>
-}
-
-#[derive(Clone, PartialEq, Properties)]
-pub struct CanvasProps {
-    // pub player1: Option<String>,
-    // pub player2: Option<String>,
-    // pub difficulty: Difficulty,
-    // pub canvas_id: Option<String>,
-    // pub game_done_call_back_click: Callback<i64>,
 }
 
 #[inline(always)]
@@ -71,7 +51,7 @@ fn get_canvas_context() -> web_sys::CanvasRenderingContext2d {
 }
 
 #[function_component(CanvasHuman)]
-pub fn canvasHuman(props: &CanvasProps) -> Html {
+pub fn canvasHuman() -> Html {
     // Boolean check state variables
     let is_mounted = use_is_mounted();
     let canvas_context_exists = use_state(|| false);
@@ -329,12 +309,8 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
 
         // Have a player win
         let win = |winner: i64| {
-            // let paused = paused.clone();
-            // paused.set(true);
             let game_won = game_won.clone();
             game_won.set(true);
-            // let reject_click = reject_click.clone();
-            // reject_click.set(false);
             let mut msg = String::new();
 
             let player_name_1 = player_name_1.clone();
@@ -384,40 +360,6 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
                     .text()
                     .await.unwrap();
             });
-        
-            // let game = Game {
-            //     gameNumber: String::new(),
-            //     gameType: String::from("Connect-4"),
-            //     Player1Name: self.props.player1.as_ref().unwrap().clone(),
-            //     Player2Name: self.props.player2.as_ref().unwrap().clone(),
-            //     WinnerName: if winner > 0 {
-            //         self.props.player1.as_ref().unwrap().clone()
-            //     }
-            //     else if winner < 0 {
-            //         self.props.player2.as_ref().unwrap().clone()
-            //     }
-            //     else {
-            //         String::from("Draw")
-            //     },
-            //     GameDate: Date::now() as u64,
-            // };
-        
-            // // construct callback
-            // let callback = self
-            //     .link
-            //     .callback(move |response: Response<Result<String, Error>>| {
-            //         log::info!("successfully saved!");
-            //         Message::Ignore
-            //     });
-        
-            // // construct request
-            // let request = Request::post("/games")
-            //     .header("Content-Type", "application/json")
-            //     .body(Json(&game))
-            //     .unwrap();
-        
-            // // send the request
-            // self.fetch_task = self.fetch_service.fetch(request, callback).ok();
         };
 
         let check = || {
