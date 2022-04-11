@@ -12,7 +12,7 @@ struct Game {
     player_1_name: String,
     player_2_name: String,
     player_2_is_computer: bool,
-    player1_won: bool,
+    player1_won: u32,
     date: DateTime<Utc>
 }
 
@@ -40,18 +40,23 @@ fn players_list(GameProps { games }: &GameProps) -> Html {
         .unique().map(|player| {
         let wins = games
             .iter()
-            .filter(|game| ((&game.player_1_name == player) && (game.player1_won == true)) || ((&game.player_2_name == player) && (game.player1_won == false)))
+            .filter(|game| ((&game.player_1_name == player) && (game.player1_won == 1)) || ((&game.player_2_name == player) && (game.player1_won == 2)))
             .count();
         let losses = games
             .iter()
-            .filter(|game| ((&game.player_1_name == player) && (game.player1_won == false)) || ((&game.player_2_name == player) && (game.player1_won == true)))
+            .filter(|game| ((&game.player_1_name == player) && (game.player1_won == 2)) || ((&game.player_2_name == player) && (game.player1_won == 1)))
             .count();
-        let percentage = ((wins as f64) * 100000.0/(wins as f64 + losses as f64)).round()/1000.0;
+        let draws = games
+            .iter()
+            .filter(|game| ((&game.player_1_name == player) && (game.player1_won == 0)) || ((&game.player_2_name == player) && (game.player1_won == 0)))
+            .count();
+        let percentage = ((wins as f64) * 100000.0/(wins as f64 + losses as f64 + draws as f64)).round()/1000.0;
         html! {
             <tr>
                 <td>{{player}}</td>
                 <td>{{wins}}</td>
                 <td>{{losses}}</td>
+                <td>{{draws}}</td>
                 <td>{{percentage}}</td>
             </tr>
         }
@@ -60,7 +65,7 @@ fn players_list(GameProps { games }: &GameProps) -> Html {
 
 #[function_component(ComputerList)]
 fn computers_list(GameProps { games }: &GameProps) -> Html {
-    games.iter().filter(|game| (game.player_2_is_computer == true) && (game.player1_won == false)).map(|game| {
+    games.iter().filter(|game| (game.player_2_is_computer == true) && (game.player1_won == 2)).map(|game| {
         html! {
         <tr>
             <td>{{game.id}}</td>
@@ -114,7 +119,7 @@ pub fn history() -> Html {
     let games_cpu_won = (*games_list)
         .clone()
         .iter()
-        .filter(|game| (game.player_2_is_computer == true) && (game.player1_won == false))
+        .filter(|game| (game.player_2_is_computer == true) && (game.player1_won == 2))
         .count();
 
     html! {
@@ -168,6 +173,7 @@ pub fn history() -> Html {
                                 <th>{"Player"}</th>
                                 <th>{"Wins"}</th>
                                 <th>{"Losses"}</th>
+                                <th>{"Draws"}</th>
                                 <th>{"Win Percentage"}</th>
                             </tr>
                             <PlayerList games={(*games_list).clone()}/>
