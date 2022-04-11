@@ -92,6 +92,8 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
     let pending_name_1 = use_state(|| "".to_string());
     let pending_name_2 = use_state(|| "".to_string());
     let current_turn = use_state(|| 0);
+    let colorblind_enabled = use_state(|| false);
+    let colorblind_enabled_display = use_state(|| false);
 
     let is_player_1_turn:usize = (*game_map).clone().iter().map(|column| column.iter().filter(|circle_number| **circle_number != 0).count()).sum::<usize>() % 2;
     
@@ -275,6 +277,15 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
             let input_elem: HtmlInputElement = event.target().unwrap_throw().dyn_into().unwrap_throw();
             let value = input_elem.value();
             pending_name_2.set(value);
+        })
+    };
+
+    let toggle_colorblind = {
+        let colorblind_enabled = colorblind_enabled.clone();
+        let colorblind_enabled_display = colorblind_enabled_display.clone();
+        Callback::from(move |_| {
+            colorblind_enabled.set(!(*colorblind_enabled));
+            colorblind_enabled_display.set(!(*colorblind_enabled));
         })
     };
 
@@ -490,10 +501,24 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
                             "#ffffff"
                         },
                         1 => {
-                            "#ff4136"
+                            match (*colorblind_enabled).clone() {
+                                true => {
+                                    "#5D3A9B"
+                                },
+                                false => {
+                                    "#ff4136"
+                                }
+                            }
                         }
                         _ => {
-                            "#ffff00"
+                            match (*colorblind_enabled).clone() {
+                                true => {
+                                    "#E66100"
+                                },
+                                false => {
+                                    "#ffff00"
+                                }
+                            }
                         }
                     };
                     canvas_context.as_ref().unwrap().set_fill_style(&circle_color.into());
@@ -541,12 +566,35 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
                 {"Start Game"}
                 </button>
                 <br />
+                <button
+                    class="button toggle-colorblind"
+                    type="button"
+                    onclick={toggle_colorblind}
+                >
+                {"Toggle Colorblind Mode"}
+                </button>
             </div>
             if *is_game_on {
                 <div style={format!("display: {}", *display_state)}>
                     <br/>
                     <h4>{format!("New Game: {} Vs {}", (*player_name_1_display).clone(), (*player_name_2_display).clone())}</h4>
-                    <small>{format!("(Disc Colors: {} - ", (*player_name_1_display).clone())} <b>{"Red"}</b> {format!("   and    {} - ", (*player_name_2_display).clone())} <b>{"Yellow)"}</b></small>
+                    <small>{format!("(Disc Colors: {} - ", (*player_name_1_display).clone())} <b>{
+                        match (*colorblind_enabled_display).clone() {
+                            true => {
+                                "Purple"
+                            },
+                            false => {
+                                "Red"
+                            }
+                    }}</b> {format!("   and    {} - ", (*player_name_2_display).clone())} <b>{
+                        match (*colorblind_enabled_display).clone() {
+                            true => {
+                                "Orange"
+                            },
+                            false => {
+                                "Yellow"
+                            }
+                    }}</b>{")"}</small>
                     <br/>
                 </div>
             }

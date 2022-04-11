@@ -797,7 +797,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 <div style={format!("display: {}", *display_state)}>
                     <br/>
                     <h4>{format!("New Game: {} Vs Computer", (*player_name_1_display).clone())}</h4>
-                    <small>{format!("(Disc Colors: {} - ", (*player_name_1_display).clone())} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
+                    <small>{format!("(Disc Colors: {} - ", (*player_name_1_display).clone())} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow"}</b>{")"}</small>
                     <br/>
                 </div>
             }
