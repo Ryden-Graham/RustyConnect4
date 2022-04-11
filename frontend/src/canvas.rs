@@ -62,14 +62,16 @@ pub fn canvasModel() -> Html {
     let disabled = use_state(|| false);
     let game_won = use_state(|| false);
     let ai_move = use_state(|| false);
+    let colorblind_enabled = use_state(|| false);
+    let colorblind_enabled_display = use_state(|| false);
     
     // Complex state variables
     let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
     let canvas:UseStateHandle<Option<web_sys::HtmlCanvasElement>> = use_state(|| None);
-    let player_name = use_state(|| "".to_string());
     let display_state = use_state(|| "".to_string());
     let game_map = use_state(|| vec![vec![0; 7]; 6]);
     let player_name_1 = use_state(|| "".to_string());
+    let player_name_1_display = use_state(|| "".to_string());
     let pending_name_1 = use_state(|| "".to_string());
     let current_turn = use_state(|| 0);
     let difficulty = use_state(|| Difficulty::Hard);
@@ -92,12 +94,12 @@ pub fn canvasModel() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -117,12 +119,12 @@ pub fn canvasModel() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -142,12 +144,12 @@ pub fn canvasModel() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -167,12 +169,12 @@ pub fn canvasModel() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -192,12 +194,12 @@ pub fn canvasModel() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -217,12 +219,12 @@ pub fn canvasModel() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -242,12 +244,12 @@ pub fn canvasModel() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -279,6 +281,15 @@ pub fn canvasModel() -> Html {
         })
     };
 
+    let toggle_colorblind = {
+        let colorblind_enabled = colorblind_enabled.clone();
+        let colorblind_enabled_display = colorblind_enabled_display.clone();
+        Callback::from(move |_| {
+            colorblind_enabled.set(!(*colorblind_enabled));
+            colorblind_enabled_display.set(!(*colorblind_enabled));
+        })
+    };
+
     let start_game = {
         let is_game_on = is_game_on.clone();
         let is_canvas_drawn = is_canvas_drawn.clone();
@@ -286,6 +297,7 @@ pub fn canvasModel() -> Html {
         let display_state = display_state.clone();
         let canvas_context = canvas_context.clone();
         let player_name_1 = player_name_1.clone();
+        let player_name_1_display = player_name_1_display.clone();
         let pending_name_1 = pending_name_1.clone();
 
         Callback::from(move |_| {
@@ -304,6 +316,7 @@ pub fn canvasModel() -> Html {
 
             // Lock in name
             player_name_1.set((*pending_name_1).clone().to_string());
+            player_name_1_display.set((*pending_name_1).clone().to_string());
 
             is_canvas_drawn.set(true);
         })
@@ -532,25 +545,12 @@ pub fn canvasModel() -> Html {
             game_map.set(game_map_clone);
             ai_move.set(false);
             current_turn.set((*current_turn) + 1);
-            // let mut done = action(choice as usize, true);
-        
-            // if fail, then random
-            // while done < 0 {
-            //     // log::info!("Falling back to random agent");
-            //     let random_choice = get_random_val(7);
-            //     let reject_click = reject_click.clone();
-            //     done = action(random_choice, true);
-            // }
         };
 
         // Have a player win
         let win = |winner: i64| {
-            // let paused = paused.clone();
-            // paused.set(true);
             let game_won = game_won.clone();
             game_won.set(true);
-            // let reject_click = reject_click.clone();
-            // reject_click.set(false);
             let mut msg = String::new();
 
             let player_name_1 = player_name_1.clone();
@@ -569,13 +569,13 @@ pub fn canvasModel() -> Html {
                 winner_num = 0;
             }
         
-            let print_msg = format!("{} - Click on game board to reset", msg);
+            let print_msg = format!("{}", msg);
             
             let canvas_context = canvas_context.clone();
             canvas_context.as_ref().unwrap().save();
             canvas_context.as_ref().unwrap().set_font("14pt sans-serif");
             canvas_context.as_ref().unwrap().set_fill_style(&"#111".into());
-            canvas_context.as_ref().unwrap().fill_text(&print_msg, 130.0, 20.0);
+            canvas_context.as_ref().unwrap().fill_text(&print_msg, 300.0, 20.0);
             canvas_context.as_ref().unwrap().restore();
         
             // send game to database
@@ -600,40 +600,6 @@ pub fn canvasModel() -> Html {
                     .text()
                     .await.unwrap();
             });
-
-            // let game = Game {
-            //     gameNumber: String::new(),
-            //     gameType: String::from("Connect-4"),
-            //     Player1Name: self.props.player1.as_ref().unwrap().clone(),
-            //     Player2Name: self.props.player2.as_ref().unwrap().clone(),
-            //     WinnerName: if winner > 0 {
-            //         self.props.player1.as_ref().unwrap().clone()
-            //     }
-            //     else if winner < 0 {
-            //         self.props.player2.as_ref().unwrap().clone()
-            //     }
-            //     else {
-            //         String::from("Draw")
-            //     },
-            //     GameDate: Date::now() as u64,
-            // };
-        
-            // // construct callback
-            // let callback = self
-            //     .link
-            //     .callback(move |response: Response<Result<String, Error>>| {
-            //         log::info!("successfully saved!");
-            //         Message::Ignore
-            //     });
-        
-            // // construct request
-            // let request = Request::post("/games")
-            //     .header("Content-Type", "application/json")
-            //     .body(Json(&game))
-            //     .unwrap();
-        
-            // // send the request
-            // self.fetch_task = self.fetch_service.fetch(request, callback).ok();
         };
 
         let check = || {
@@ -717,10 +683,24 @@ pub fn canvasModel() -> Html {
                             "#ffffff"
                         },
                         1 => {
-                            "#ff4136"
+                            match (*colorblind_enabled).clone() {
+                                true => {
+                                    "#5D3A9B"
+                                },
+                                false => {
+                                    "#ff4136"
+                                }
+                            }
                         }
                         _ => {
-                            "#ffff00"
+                            match (*colorblind_enabled).clone() {
+                                true => {
+                                    "#E66100"
+                                },
+                                false => {
+                                    "#ffff00"
+                                }
+                            }
                         }
                     };
                     canvas_context.as_ref().unwrap().set_fill_style(&circle_color.into());
@@ -770,12 +750,35 @@ pub fn canvasModel() -> Html {
                     <option value="medium">{"Medium"}</option>
                     <option value="hard">{"Hard"}</option>
                 </select>
+                <button
+                    class="button toggle-colorblind"
+                    type="button"
+                    onclick={toggle_colorblind}
+                >
+                {"Toggle Colorblind Mode"}
+                </button>
             </div>
             if *is_game_on {
                 <div style={format!("display: {}", *display_state)}>
                     <br/>
-                    <h4>{format!("New Game: {} Vs Computer", *player_name)}</h4>
-                    <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
+                    <h4>{format!("New Game: {} Vs Computer", (*player_name_1_display).clone())}</h4>
+                    <small>{format!("(Disc Colors: {} - ", (*player_name_1_display).clone())} <b>{
+                        match (*colorblind_enabled_display).clone() {
+                        true => {
+                            "Purple"
+                        },
+                        false => {
+                            "Red"
+                        }
+                }}</b> {"   and    Computer - "} <b>{
+                    match (*colorblind_enabled_display).clone() {
+                        true => {
+                            "Orange"
+                        },
+                        false => {
+                            "Yellow"
+                        }
+                }}</b>{")"}</small>
                     <br/>
                 </div>
             }
