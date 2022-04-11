@@ -83,30 +83,177 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     // Add piece
     let game_map_state = game_map.clone();
     
-    let add_piece = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
-        let mut game_map_clone = (*game_map).clone();
-        for i in 0..7 {
-            if (event.offset_x() as f64) < (640.0/7.0*((i+1) as f64)) as f64 {
-                for j in 0..6 {
-                    if game_map_clone[5-j][i] == 0 {
-                        game_map_clone[5-j][i] = match is_player_1_turn {
-                            0 => {
-                                1
-                            },
-                            _ => {
-                                2
-                            }
-                        };
-                        break;
-                    }
+    let drop_disk_1 = {
+        let game_map = game_map.clone();
+        Callback::from(move |_| {
+            let mut game_map_clone = (*game_map).clone();
+            for i in 0..6 {
+                if game_map_clone[5-i][0] == 0 {
+                    game_map_clone[5-i][0] = match is_player_1_turn {
+                        0 => {
+                            1
+                        },
+                        _ => {
+                            2
+                        }
+                    };
+                    break;
                 }
-                break;
             }
-        }
+            game_map.set(game_map_clone);
+        })
+    };
 
-        game_map_state.set(game_map_clone);
-        // canvas_context_add.as_ref().unwrap().move_to(event.offset_x() as f64, event.offset_y() as f64);
-    }) as Box<dyn FnMut(_)>);
+    let drop_disk_2 = {
+        let game_map = game_map.clone();
+        Callback::from(move |_| {
+            let mut game_map_clone = (*game_map).clone();
+            for i in 0..6 {
+                if game_map_clone[5-i][1] == 0 {
+                    game_map_clone[5-i][1] = match is_player_1_turn {
+                        0 => {
+                            1
+                        },
+                        _ => {
+                            2
+                        }
+                    };
+                    break;
+                }
+            }
+            game_map.set(game_map_clone);
+        })
+    };
+
+    let drop_disk_3 = {
+        let game_map = game_map.clone();
+        Callback::from(move |_| {
+            let mut game_map_clone = (*game_map).clone();
+            for i in 0..6 {
+                if game_map_clone[5-i][2] == 0 {
+                    game_map_clone[5-i][2] = match is_player_1_turn {
+                        0 => {
+                            1
+                        },
+                        _ => {
+                            2
+                        }
+                    };
+                    break;
+                }
+            }
+            game_map.set(game_map_clone);
+        })
+    };
+
+    let drop_disk_4 = {
+        let game_map = game_map.clone();
+        Callback::from(move |_| {
+            let mut game_map_clone = (*game_map).clone();
+            for i in 0..6 {
+                if game_map_clone[5-i][3] == 0 {
+                    game_map_clone[5-i][3] = match is_player_1_turn {
+                        0 => {
+                            1
+                        },
+                        _ => {
+                            2
+                        }
+                    };
+                    break;
+                }
+            }
+            game_map.set(game_map_clone);
+        })
+    };
+
+    let drop_disk_5 = {
+        let game_map = game_map.clone();
+        Callback::from(move |_| {
+            let mut game_map_clone = (*game_map).clone();
+            for i in 0..6 {
+                if game_map_clone[5-i][4] == 0 {
+                    game_map_clone[5-i][4] = match is_player_1_turn {
+                        0 => {
+                            1
+                        },
+                        _ => {
+                            2
+                        }
+                    };
+                    break;
+                }
+            }
+            game_map.set(game_map_clone);
+        })
+    };
+
+    let drop_disk_6 = {
+        let game_map = game_map.clone();
+        Callback::from(move |_| {
+            let mut game_map_clone = (*game_map).clone();
+            for i in 0..6 {
+                if game_map_clone[5-i][5] == 0 {
+                    game_map_clone[5-i][5] = match is_player_1_turn {
+                        0 => {
+                            1
+                        },
+                        _ => {
+                            2
+                        }
+                    };
+                    break;
+                }
+            }
+            game_map.set(game_map_clone);
+        })
+    };
+
+    let drop_disk_7 = {
+        let game_map = game_map.clone();
+        Callback::from(move |_| {
+            let mut game_map_clone = (*game_map).clone();
+            for i in 0..6 {
+                if game_map_clone[5-i][6] == 0 {
+                    game_map_clone[5-i][6] = match is_player_1_turn {
+                        0 => {
+                            1
+                        },
+                        _ => {
+                            2
+                        }
+                    };
+                    break;
+                }
+            }
+            game_map.set(game_map_clone);
+        })
+    };
+
+    // let add_piece = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+    //     let mut game_map_clone = (*game_map_state).clone();
+    //     for i in 0..7 {
+    //         if (event.offset_x() as f64) < (640.0/7.0*((i+1) as f64)) as f64 {
+    //             for j in 0..6 {
+    //                 if game_map_clone[5-j][i] == 0 {
+    //                     game_map_clone[5-j][i] = match is_player_1_turn {
+    //                         0 => {
+    //                             1
+    //                         },
+    //                         _ => {
+    //                             2
+    //                         }
+    //                     };
+    //                     break;
+    //                 }
+    //             }
+    //             break;
+    //         }
+    //     }
+
+    //     game_map_state.set(game_map_clone);
+    //     // canvas_context_add.as_ref().unwrap().move_to(event.offset_x() as f64, event.offset_y() as f64);
+    // }) as Box<dyn FnMut(_)>);
 
 
     let start_game = {
@@ -145,17 +292,8 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             canvas.set(Some(get_canvas_element()));
         }
 
-        if *is_canvas_drawn && !*is_listener_active {
-            let is_listener_active = is_listener_active.clone();
-            is_listener_active.set(true);
-            let canvas = canvas.clone();
-
-            canvas.as_ref().unwrap().add_event_listener_with_callback("click", add_piece.as_ref().unchecked_ref());
-            add_piece.forget();
-        }
-
         // Draw the gameboard on every re-render
-        if *is_listener_active {
+        if *is_canvas_drawn {
             for i in 0..6 { // y coord
                 for j in 0..7 { // x coord
                     canvas_context.as_ref().unwrap().begin_path();
@@ -222,6 +360,15 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             }
             <br/>
             <canvas id="canvas" height="480" width="640"></canvas>
+            if *is_game_on {
+                <button class="button canvas-button" type="button" onclick={drop_disk_1}> {"Drop"} </button>
+                <button class="button canvas-button" type="button" onclick={drop_disk_2}> {"Drop"} </button>
+                <button class="button canvas-button" type="button" onclick={drop_disk_3}> {"Drop"} </button>
+                <button class="button canvas-button" type="button" onclick={drop_disk_4}> {"Drop"} </button>
+                <button class="button canvas-button" type="button" onclick={drop_disk_5}> {"Drop"} </button>
+                <button class="button canvas-button" type="button" onclick={drop_disk_6}> {"Drop"} </button>
+                <button class="button canvas-button" type="button" onclick={drop_disk_7}> {"Drop"} </button>
+            }
         </>
     }
 }
