@@ -8,7 +8,7 @@ Yarn: install with npm: “npm i yarn”
 (requires npm, install npm with: “npm install -g npm”)        
         
 In a terminal in the project folder, run:
-        run : “cargo run -p backend” to start the backend server
+        “cargo run -p backend” to start the backend server
 
         In another terminal in the “frontend” folder, run:
 “yarn install” initially to install dependencies.
