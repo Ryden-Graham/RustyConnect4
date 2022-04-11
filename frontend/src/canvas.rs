@@ -64,8 +64,8 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     let canvas_context_exists = use_state(|| false);
     let is_canvas_drawn = use_state(|| false);
     let is_game_on = use_state(|| false);
-    let is_listener_active = use_state(|| false);
     let disabled = use_state(|| false);
+    let game_won = use_state(|| false);
     
     // Complex state variables
     let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
@@ -73,15 +73,11 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     let player_name = use_state(|| "".to_string());
     let display_state = use_state(|| "".to_string());
     let game_map = use_state(|| vec![vec![0; 7]; 6]);
+    let player_name_1 = use_state(|| "".to_string());
+    let player_name_2 = use_state(|| "Computer".to_string());
+    let current_turn = use_state(|| 0);
 
     let is_player_1_turn:usize = (*game_map).clone().iter().map(|column| column.iter().filter(|circle_number| **circle_number != 0).count()).sum::<usize>() % 2;
-
-    fn on_region (coord: f64, x: f64, radius: f64) -> bool {
-        return ((coord - x) * (coord - x) <= radius * radius);
-    };
-
-    // Add piece
-    let game_map_state = game_map.clone();
     
     let drop_disk_1 = {
         let game_map = game_map.clone();
@@ -94,7 +90,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             1
                         },
                         _ => {
-                            2
+                            -1
                         }
                     };
                     break;
@@ -115,7 +111,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             1
                         },
                         _ => {
-                            2
+                            -1
                         }
                     };
                     break;
@@ -136,7 +132,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             1
                         },
                         _ => {
-                            2
+                            -1
                         }
                     };
                     break;
@@ -157,7 +153,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             1
                         },
                         _ => {
-                            2
+                            -1
                         }
                     };
                     break;
@@ -178,7 +174,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             1
                         },
                         _ => {
-                            2
+                            -1
                         }
                     };
                     break;
@@ -199,7 +195,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             1
                         },
                         _ => {
-                            2
+                            -1
                         }
                     };
                     break;
@@ -220,7 +216,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             1
                         },
                         _ => {
-                            2
+                            -1
                         }
                     };
                     break;
@@ -229,32 +225,6 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             game_map.set(game_map_clone);
         })
     };
-
-    // let add_piece = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
-    //     let mut game_map_clone = (*game_map_state).clone();
-    //     for i in 0..7 {
-    //         if (event.offset_x() as f64) < (640.0/7.0*((i+1) as f64)) as f64 {
-    //             for j in 0..6 {
-    //                 if game_map_clone[5-j][i] == 0 {
-    //                     game_map_clone[5-j][i] = match is_player_1_turn {
-    //                         0 => {
-    //                             1
-    //                         },
-    //                         _ => {
-    //                             2
-    //                         }
-    //                     };
-    //                     break;
-    //                 }
-    //             }
-    //             break;
-    //         }
-    //     }
-
-    //     game_map_state.set(game_map_clone);
-    //     // canvas_context_add.as_ref().unwrap().move_to(event.offset_x() as f64, event.offset_y() as f64);
-    // }) as Box<dyn FnMut(_)>);
-
 
     let start_game = {
         let is_game_on = is_game_on.clone();
@@ -282,6 +252,125 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     };
 
     use_effect(move || {
+
+        // Have a player win
+        let win = |winner: i64| {
+            // let paused = paused.clone();
+            // paused.set(true);
+            let game_won = game_won.clone();
+            game_won.set(true);
+            // let reject_click = reject_click.clone();
+            // reject_click.set(false);
+            let mut msg = String::new();
+
+            let player_name_1 = player_name_1.clone();
+            let player_name_2 = player_name_2.clone();
+            if winner > 0 {
+                msg = format!("{} wins", (*player_name_1));
+            }
+            else if winner < 0 {
+                msg = format!("{} wins", (*player_name_2));
+            }
+            else {
+                msg = "It's a draw".to_string();
+            }
+        
+            let print_msg = format!("{} - Click on game board to reset", msg);
+            
+            let canvas_context = canvas_context.clone();
+            canvas_context.as_ref().unwrap().save();
+            canvas_context.as_ref().unwrap().set_font("14pt sans-serif");
+            canvas_context.as_ref().unwrap().set_fill_style(&"#111".into());
+            canvas_context.as_ref().unwrap().fill_text(&print_msg, 130.0, 20.0);
+            canvas_context.as_ref().unwrap().restore();
+        
+            // let game = Game {
+            //     gameNumber: String::new(),
+            //     gameType: String::from("Connect-4"),
+            //     Player1Name: self.props.player1.as_ref().unwrap().clone(),
+            //     Player2Name: self.props.player2.as_ref().unwrap().clone(),
+            //     WinnerName: if winner > 0 {
+            //         self.props.player1.as_ref().unwrap().clone()
+            //     }
+            //     else if winner < 0 {
+            //         self.props.player2.as_ref().unwrap().clone()
+            //     }
+            //     else {
+            //         String::from("Draw")
+            //     },
+            //     GameDate: Date::now() as u64,
+            // };
+        
+            // // construct callback
+            // let callback = self
+            //     .link
+            //     .callback(move |response: Response<Result<String, Error>>| {
+            //         log::info!("successfully saved!");
+            //         Message::Ignore
+            //     });
+        
+            // // construct request
+            // let request = Request::post("/games")
+            //     .header("Content-Type", "application/json")
+            //     .body(Json(&game))
+            //     .unwrap();
+        
+            // // send the request
+            // self.fetch_task = self.fetch_service.fetch(request, callback).ok();
+        };
+
+        let check = || {
+            // Check if player won
+            let mut right: i64 = 0;
+            let mut down: i64 = 0;
+            let mut down_right: i64 = 0;
+            let mut up_right: i64 = 0;
+            
+            let game_map = game_map.clone();
+            for i in 0..6 {
+                for j in 0..7 {
+                    right = 0;
+                    down = 0;
+                    down_right = 0;
+                    up_right = 0;
+                    for k in 0..4 {
+                        if j + k < 7 {
+                            right += (*game_map)[i][j + k];
+                        }
+                        if i + k < 6 {
+                            down += (*game_map)[i + k][j];
+                        }
+                        if i + k < 6 && j + k < 7 {
+                            down_right += (*game_map)[i + k][j + k];
+                        }
+                        if i >= k && j + k < 7 {
+                            up_right += (*game_map)[i - k][j + k];
+                        }
+                    }
+    
+                    if right.abs() == 4 {
+                        win(right);
+                    } 
+                    else if down.abs() == 4 {
+                        win(down);
+                    } 
+                    else if down_right.abs() == 4 {
+                        win(down_right);
+                    } 
+                    else if up_right.abs() == 4 {
+                        win(up_right);
+                    }
+                }
+            }
+            
+            // check if the game is a tie
+            let current_turn = current_turn.clone();
+            let game_won = game_won.clone();
+            if (*current_turn == 42) && (!*game_won) {
+                win(0);
+            }
+        };
+        
         if is_mounted() && !*canvas_context_exists {
             let canvas_context_exists = canvas_context_exists.clone();
             let canvas = canvas.clone();
@@ -293,7 +382,8 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
         }
 
         // Draw the gameboard on every re-render
-        if *is_canvas_drawn {
+        if *is_canvas_drawn && !*game_won {
+            // Draw gameboard on every re-render
             for i in 0..6 { // y coord
                 for j in 0..7 { // x coord
                     canvas_context.as_ref().unwrap().begin_path();
@@ -326,6 +416,11 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                     );
                     canvas_context.as_ref().unwrap().fill(); 
                 }
+            }
+
+            if !*game_won {
+                // Check if player has won
+                check();
             }
         }
 
