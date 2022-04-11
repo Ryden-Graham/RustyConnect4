@@ -548,13 +548,15 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
             <br/>
             <canvas id="canvas" height="480" width="640"></canvas>
             if *is_game_on {
-                <button class="button canvas-button" type="button" onclick={drop_disk_1}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_2}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_3}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_4}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_5}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_6}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_7}> {"Drop"} </button>
+                <div class="button-container">
+                    <button class="button canvas-button" type="button" onclick={drop_disk_1}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_2}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_3}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_4}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_5}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_6}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_7}> {"Drop"} </button>
+                </div>
             }
         </>
     }
