@@ -71,7 +71,7 @@ fn get_canvas_context() -> web_sys::CanvasRenderingContext2d {
 }
 
 #[function_component(CanvasHuman)]
-pub fn canvasHuman(props: &CanvasProps) -> Html {
+pub fn canvasHuman() -> Html {
     // Boolean check state variables
     let is_mounted = use_is_mounted();
     let canvas_context_exists = use_state(|| false);
