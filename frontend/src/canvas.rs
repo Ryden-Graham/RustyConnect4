@@ -17,6 +17,8 @@ use yew_hooks::use_is_mounted;
 use crate::connect4Computer::Difficulty::{self, *};
 use crate::ScoreBoard::Game;
 use stdweb::js;
+use wasm_bindgen::UnwrapThrowExt;
+use web_sys::HtmlInputElement;
 
 // macro_rules! enclose {
 //     ( ($( $x:ident ),*) $y:expr ) => {
@@ -243,6 +245,23 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
         })
     };
 
+    let update_difficulty = {
+        let difficulty = difficulty.clone();
+
+        Callback::from(move |change_data: Event| {
+            let event: Event = change_data.dyn_into().unwrap_throw();
+            let input_elem: HtmlInputElement = event.target().unwrap_throw().dyn_into().unwrap_throw();
+            let value = input_elem.value();
+            if value == "Easy" {
+                difficulty.set(Difficulty::Easy);
+            } else if value == "Medium" {
+                difficulty.set(Difficulty::Medium);
+            } else {
+                difficulty.set(Difficulty::Hard);
+            }
+        })
+    };
+
     let start_game = {
         let is_game_on = is_game_on.clone();
         let is_canvas_drawn = is_canvas_drawn.clone();
@@ -269,7 +288,8 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     };
 
     use_effect(move || {
-        // Many closures here are based on the example json!
+        // Closures used for the AI was based heavily off of the example code! (Some are line for line but are a Rust equivalent)
+
         let max_state = |ai_move_value: i64, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64| -> (i64, i64) { return (0, 0); };
         let min_state = |ai_move_value: i64, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64| -> (i64, i64) { return (0, 0); };
 
@@ -694,6 +714,11 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 {"Start Game"}
                 </button>
                 <br />
+                <select class= "difficulty-dropdown" name="Difficulty" disabled={*disabled} id="difficulty" onchange={update_difficulty}>
+                    <option value="easy">{"Easy"}</option>
+                    <option value="medium">{"Medium"}</option>
+                    <option value="hard">{"Hard"}</option>
+                </select>
             </div>
             if *is_game_on {
                 <div style={format!("display: {}", *display_state)}>
@@ -705,14 +730,17 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             }
             <br/>
             <canvas id="canvas" height="480" width="640"></canvas>
+            <br/>
             if *is_game_on {
-                <button class="button canvas-button" type="button" onclick={drop_disk_1}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_2}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_3}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_4}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_5}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_6}> {"Drop"} </button>
-                <button class="button canvas-button" type="button" onclick={drop_disk_7}> {"Drop"} </button>
+                <div class="button-container">
+                    <button class="button canvas-button" type="button" onclick={drop_disk_1}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_2}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_3}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_4}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_5}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_6}> {"Drop"} </button>
+                    <button class="button canvas-button" type="button" onclick={drop_disk_7}> {"Drop"} </button>
+                </div>
             }
         </>
     }

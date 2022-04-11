@@ -134,3 +134,15 @@ table, th, td {
 .bottom-table {
     padding-bottom: 50px;
 }
+
+.difficulty-dropdown {
+    margin-left: 15px;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: 550px;
+    margin-left: 52px;
+}
