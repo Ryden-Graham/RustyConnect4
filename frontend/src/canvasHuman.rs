@@ -79,6 +79,8 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
     let is_game_on = use_state(|| false);
     let disabled = use_state(|| false);
     let game_won = use_state(|| false);
+    let colorblind_enabled = use_state(|| false);
+    let colorblind_enabled_display = use_state(|| false);
     
     // Complex state variables
     let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
@@ -92,8 +94,6 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
     let pending_name_1 = use_state(|| "".to_string());
     let pending_name_2 = use_state(|| "".to_string());
     let current_turn = use_state(|| 0);
-    let colorblind_enabled = use_state(|| false);
-    let colorblind_enabled_display = use_state(|| false);
 
     let is_player_1_turn:usize = (*game_map).clone().iter().map(|column| column.iter().filter(|circle_number| **circle_number != 0).count()).sum::<usize>() % 2;
     

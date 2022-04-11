@@ -82,6 +82,8 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     let disabled = use_state(|| false);
     let game_won = use_state(|| false);
     let ai_move = use_state(|| false);
+    let colorblind_enabled = use_state(|| false);
+    let colorblind_enabled_display = use_state(|| false);
     
     // Complex state variables
     let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
@@ -296,6 +298,15 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             } else {
                 difficulty.set(Difficulty::Hard);
             }
+        })
+    };
+
+    let toggle_colorblind = {
+        let colorblind_enabled = colorblind_enabled.clone();
+        let colorblind_enabled_display = colorblind_enabled_display.clone();
+        Callback::from(move |_| {
+            colorblind_enabled.set(!(*colorblind_enabled));
+            colorblind_enabled_display.set(!(*colorblind_enabled));
         })
     };
 
@@ -739,10 +750,24 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             "#ffffff"
                         },
                         1 => {
-                            "#ff4136"
+                            match (*colorblind_enabled).clone() {
+                                true => {
+                                    "#5D3A9B"
+                                },
+                                false => {
+                                    "#ff4136"
+                                }
+                            }
                         }
                         _ => {
-                            "#ffff00"
+                            match (*colorblind_enabled).clone() {
+                                true => {
+                                    "#E66100"
+                                },
+                                false => {
+                                    "#ffff00"
+                                }
+                            }
                         }
                     };
                     canvas_context.as_ref().unwrap().set_fill_style(&circle_color.into());
@@ -792,12 +817,35 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                     <option value="medium">{"Medium"}</option>
                     <option value="hard">{"Hard"}</option>
                 </select>
+                <button
+                    class="button toggle-colorblind"
+                    type="button"
+                    onclick={toggle_colorblind}
+                >
+                {"Toggle Colorblind Mode"}
+                </button>
             </div>
             if *is_game_on {
                 <div style={format!("display: {}", *display_state)}>
                     <br/>
                     <h4>{format!("New Game: {} Vs Computer", (*player_name_1_display).clone())}</h4>
-                    <small>{format!("(Disc Colors: {} - ", (*player_name_1_display).clone())} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow"}</b>{")"}</small>
+                    <small>{format!("(Disc Colors: {} - ", (*player_name_1_display).clone())} <b>{
+                        match (*colorblind_enabled_display).clone() {
+                        true => {
+                            "Purple"
+                        },
+                        false => {
+                            "Red"
+                        }
+                }}</b> {"   and    Computer - "} <b>{
+                    match (*colorblind_enabled_display).clone() {
+                        true => {
+                            "Orange"
+                        },
+                        false => {
+                            "Yellow"
+                        }
+                }}</b>{")"}</small>
                     <br/>
                 </div>
             }
