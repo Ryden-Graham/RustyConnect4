@@ -16,6 +16,7 @@ use log;
 use yew_hooks::use_is_mounted;
 use crate::connect4Computer::Difficulty::{self, *};
 use crate::ScoreBoard::Game;
+use stdweb::js;
 
 // macro_rules! enclose {
 //     ( ($( $x:ident ),*) $y:expr ) => {
@@ -66,6 +67,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     let is_game_on = use_state(|| false);
     let disabled = use_state(|| false);
     let game_won = use_state(|| false);
+    let ai_move = use_state(|| false);
     
     // Complex state variables
     let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
@@ -76,11 +78,13 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     let player_name_1 = use_state(|| "".to_string());
     let player_name_2 = use_state(|| "Computer".to_string());
     let current_turn = use_state(|| 0);
+    let difficulty = use_state(|| Difficulty::Easy);
 
     let is_player_1_turn:usize = (*game_map).clone().iter().map(|column| column.iter().filter(|circle_number| **circle_number != 0).count()).sum::<usize>() % 2;
     
     let drop_disk_1 = {
         let game_map = game_map.clone();
+        let ai_move = ai_move.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -97,11 +101,13 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 }
             }
             game_map.set(game_map_clone);
+            ai_move.set(true);
         })
     };
 
     let drop_disk_2 = {
         let game_map = game_map.clone();
+        let ai_move = ai_move.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -118,11 +124,13 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 }
             }
             game_map.set(game_map_clone);
+            ai_move.set(true);
         })
     };
 
     let drop_disk_3 = {
         let game_map = game_map.clone();
+        let ai_move = ai_move.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -139,11 +147,13 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 }
             }
             game_map.set(game_map_clone);
+            ai_move.set(true);
         })
     };
 
     let drop_disk_4 = {
         let game_map = game_map.clone();
+        let ai_move = ai_move.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -160,11 +170,13 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 }
             }
             game_map.set(game_map_clone);
+            ai_move.set(true);
         })
     };
 
     let drop_disk_5 = {
         let game_map = game_map.clone();
+        let ai_move = ai_move.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -181,11 +193,13 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 }
             }
             game_map.set(game_map_clone);
+            ai_move.set(true);
         })
     };
 
     let drop_disk_6 = {
         let game_map = game_map.clone();
+        let ai_move = ai_move.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -202,11 +216,13 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 }
             }
             game_map.set(game_map_clone);
+            ai_move.set(true);
         })
     };
 
     let drop_disk_7 = {
         let game_map = game_map.clone();
+        let ai_move = ai_move.clone();
         Callback::from(move |_| {
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
@@ -223,6 +239,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 }
             }
             game_map.set(game_map_clone);
+            ai_move.set(true);
         })
     };
 
@@ -252,6 +269,236 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     };
 
     use_effect(move || {
+        // Many closures here are based on the example json!
+        let max_state = |ai_move_value: i64, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64| -> (i64, i64) { return (0, 0); };
+        let min_state = |ai_move_value: i64, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64| -> (i64, i64) { return (0, 0); };
+
+        let fill_map = |state: &Vec<Vec<i64>>, column: usize, value: i64| -> Vec<Vec<i64>> {
+            let mut new_board = state.clone();
+            if new_board[0][column] != 0 || column < 0|| column > 6 {
+                new_board[0][column] = -999; // error detection
+            }
+        
+            let mut done = false;
+            let mut row = 0;
+        
+            for i in (0..6).rev() {
+                if new_board[i][column] == 0 {
+                    done = true;
+                    row = i;
+                    break;
+                }
+            }
+        
+            new_board[row][column] = value;
+            return new_board;
+        };
+
+        let get_random_val = |val: usize| -> usize {
+            let rand_num = js! { return Math.random(); };
+            let rand_num_f64: f64 = stdweb::unstable::TryInto::try_into(rand_num).unwrap();
+            return (rand_num_f64 * val as f64).floor() as usize;
+        };
+
+        let choose = |choice: &Vec<usize>| -> i64 {
+            let index = get_random_val(choice.len());
+            return choice[index] as i64;
+        };
+
+        let check_state = |state: &Vec<Vec<i64>>| -> (i64, i64) {
+            let mut win_val = 0;
+            let mut chain_val = 0;
+            let mut right = 0;
+            let mut down = 0;
+            let mut down_right = 0;
+            let mut up_right = 0;
+            for i in 0..6 {
+                for j in 0..7 {
+                    right = 0;
+                    down = 0;
+                    down_right = 0;
+                    up_right = 0;
+                    for k in 0..4 {
+                        if j + k < 7 {
+                            right += state[i][j + k];
+                        }
+                        if i + k < 6 {
+                            down += state[i + k][j];
+                        }
+                        if i + k < 6 && j + k < 7 {
+                            down_right += state[i + k][j + k];
+                        }
+                        if i >= k && j + k < 7 {
+                            up_right += state[i - k][j + k];
+                        }
+                    }
+                    chain_val += right * right * right;
+                    chain_val += down * down * down;
+                    chain_val += down_right * down_right * down_right;
+                    chain_val += up_right * up_right * up_right;
+        
+                    if right.abs() == 4 {
+                        win_val = right;
+                    }
+                    else if down.abs() == 4 {
+                        win_val = down;
+                    }
+                    else if down_right.abs() == 4 {
+                        win_val = down_right;
+                    }
+                    else if up_right.abs() == 4 {
+                        win_val = up_right;
+                    }
+                }
+            }
+            return (win_val, chain_val);
+        };
+
+        let value = |ai_move_value: i64, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64| -> (i64, i64) {
+            let val = check_state(state);
+            // make depth lower if ai is harder
+            let difficulty = difficulty.clone();
+            let max_depth = match *difficulty {
+                Easy => 1,
+                Medium => 3,
+                Hard => 5,
+            };
+            if depth >= max_depth {
+                // calculate value
+                let mut ret_val = 0;
+        
+                // if win, value = +inf
+                let win_val = val.0;
+                let chain_val = val.1 * ai_move_value;
+                ret_val = chain_val;
+        
+                // If it lead to winning, then do it
+                if win_val == 4 * ai_move_value { // AI win, AI wants to win of course
+                    ret_val = 999999;
+                }
+                else if win_val == 4 * ai_move_value * -1 { // AI lose, AI hates losing
+                    ret_val = 999999 * -1;
+                }
+                ret_val -= depth * depth;
+        
+                return (ret_val, -1);
+            }
+        
+            let win = val.0;
+            // if already won, then return the value right away
+            if win == 4 * ai_move_value { // AI win, AI wants to win of course
+                return (999999 - depth * depth, -1);
+            }
+            if win == 4 * ai_move_value * -1 { // AI lose, AI hates losing
+                return (999999 * -1 - depth * depth, -1);
+            }
+        
+            if depth % 2 == 0 {
+                return min_state(ai_move_value, state, depth + 1, alpha, beta);
+            }
+            return max_state(ai_move_value, state, depth + 1, alpha, beta);
+        };
+
+        let max_state = |ai_move_value: i64, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64| -> (i64, i64) {
+            let mut v = -100000000007;
+            let mut next_move: i64 = -1;
+            let mut move_queue = Vec::new();
+            
+            for j in 0..7 {
+                let temp_state = fill_map(state, j, ai_move_value);
+                if temp_state[0][j] != -999 {
+                    let temp_val = value(ai_move_value, &temp_state, depth, alpha, beta);
+                    if temp_val.0 > v {
+                        v = temp_val.0;
+                        next_move = j as i64;
+                        move_queue = Vec::new();
+                        move_queue.push(j);
+                    }
+                    else if temp_val.0 == v {
+                        move_queue.push(j);
+                    }
+        
+                    // alpha-beta pruning
+                    if v > beta {
+                        next_move = choose(&move_queue);
+                        return (v, next_move);
+                    }
+                    alpha = std::cmp::max(alpha, v);
+                }
+            }
+            next_move = choose(&move_queue);
+        
+            return (v, next_move);
+        };
+
+        let min_state = |ai_move_value: i64, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64| -> (i64, i64) {
+            let mut v = 100000000007;
+            let mut next_move: i64 = -1;
+            let mut move_queue = Vec::new();
+        
+            for j in 0..7 {
+                let temp_state = fill_map(state, j, ai_move_value * -1);
+                if temp_state[0][j] != -999 {
+                    let temp_val = value(ai_move_value, &temp_state, depth, alpha, beta);
+                    if temp_val.0 < v {
+                        v = temp_val.0;
+                        next_move = j as i64;
+                        move_queue = Vec::new();
+                        move_queue.push(j);
+                    }
+                    else if temp_val.0 == v {
+                        move_queue.push(j);
+                    }
+        
+                    // alpha-beta pruning
+                    if v < alpha {
+                        next_move = choose(&move_queue);
+                        return (v, next_move);
+                    }
+                    beta = std::cmp::min(beta, v);
+                }
+            }
+            next_move = choose(&move_queue);
+        
+            return (v, next_move);
+        };
+
+        // Run AI move
+        let ai = |ai_move_value: i64| {
+            let game_map = game_map.clone();
+            let new_map = (*game_map).clone();
+            let choice_val = max_state(ai_move_value, &new_map, 0, -100000000007, 100000000007);
+        
+            let val = choice_val.0;
+            let choice = choice_val.1;
+            // let paused = paused.clone();
+            // paused.set(false);
+            let mut game_map_clone = (*game_map).clone();
+            for i in 0..6 {
+                if game_map_clone[5-i][6] == 0 {
+                    game_map_clone[5-i][6] = match is_player_1_turn {
+                        0 => {
+                            1
+                        },
+                        _ => {
+                            -1
+                        }
+                    };
+                    break;
+                }
+            }
+            game_map.set(game_map_clone);
+            ai_move.set(false);
+            // let mut done = action(choice as usize, true);
+        
+            // if fail, then random
+            // while done < 0 {
+            //     // log::info!("Falling back to random agent");
+            //     let random_choice = get_random_val(7);
+            //     let reject_click = reject_click.clone();
+            //     done = action(random_choice, true);
+            // }
+        };
 
         // Have a player win
         let win = |winner: i64| {
@@ -421,6 +668,9 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             if !*game_won {
                 // Check if player has won
                 check();
+                if *ai_move {
+                    ai(-1);
+                }
             }
         }
 
