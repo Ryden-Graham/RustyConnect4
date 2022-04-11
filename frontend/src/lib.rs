@@ -10,6 +10,7 @@ pub mod howToConnect4;
 pub mod connect4Computer;
 pub mod howToTootOtto;
 pub mod canvas;
+pub mod canvas_toot;
 pub mod canvasHuman;
 pub mod ScoreBoard;
 pub mod connect4Human;

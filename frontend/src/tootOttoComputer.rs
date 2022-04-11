@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use crate::canvas_toot::CanvasTOOTComputer;
 
 #[function_component(TootOttoComputer)]
 pub fn connect4Computer() -> Html {
@@ -8,6 +9,7 @@ pub fn connect4Computer() -> Html {
                 <b>{"Enter Your Name"}</b>
             </div>
             <hr class="header-divider"/>
+            <CanvasTOOTComputer />
         </div>
     }
 }
