@@ -16,7 +16,7 @@ struct Game {
     player_1_name: String,
     player_2_name: String,
     player_2_is_computer: bool,
-    player1_won: bool,
+    player1_won: u32,
     date: DateTime<Utc>
 }
 
@@ -41,11 +41,14 @@ fn games_list(GameProps { games }: &GameProps) -> Html {
             <td>{{game.player_1_name.clone()}}</td>
             <td>{{game.player_2_name.clone()}}</td>
             <td>{{match game.player1_won {
-                true => {
+                1 => {
                     game.player_1_name.clone()
                 },
-                false => {
+                2 => {
                     game.player_2_name.clone()
+                },
+                _ => {
+                    "draw".to_string()
                 }
             }}}</td>
             <td>{game.date}</td>
@@ -117,7 +120,21 @@ pub fn history() -> Html {
                     }
                 },
                 player_2_is_computer: p2name.len() == 0,
-                player1_won: rng.gen::<f32>() < 0.5,
+                player1_won: match rng.gen::<f32>() < 0.3 {
+                    true => {
+                        1
+                    },
+                    false => {
+                        match rng.gen::<f32>() < 0.5 {
+                            true => {
+                                2
+                            },
+                            false => {
+                                0
+                            }
+                        }
+                    }
+                },
                 date: utc
             };
             

@@ -18,7 +18,7 @@ struct Game {
     player_1_name: String,
     player_2_name: String,
     player_2_is_computer: bool,
-    player1_won: bool,
+    player1_won: u32,
     date: DateTime<Utc>
 }
 
@@ -43,8 +43,9 @@ fn get_command(command: String) -> String {
     // uncomment this and run to nuke database
     if command == "nuke the world" {
         let collection = get_game_database();
-        collection.delete_many(doc! { "player1_won": false }, None).unwrap();
-        collection.delete_many(doc! { "player1_won": true }, None).unwrap();
+        collection.delete_many(doc! { "player1_won": 2 }, None).unwrap();
+        collection.delete_many(doc! { "player1_won": 1 }, None).unwrap();
+        collection.delete_many(doc! { "player1_won": 0 }, None).unwrap();
     }
     command
 }
