@@ -19,6 +19,17 @@ use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use web_sys::HtmlInputElement;
 
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+struct Game {
+    id: u32,
+    game_type_is_c4: bool, 
+    player_1_name: String,
+    player_2_name: String,
+    player_2_is_computer: bool,
+    player1_won: u32,
+    date: DateTime<Utc>
+}
+
 #[inline(always)]
 fn get_canvas_element() -> web_sys::HtmlCanvasElement {
     web_sys::window()
