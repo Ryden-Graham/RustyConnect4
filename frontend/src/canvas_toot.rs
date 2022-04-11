@@ -145,8 +145,8 @@ pub fn canvasTOOTComputer() -> Html {
             game_map.set(game_map_clone);
             let mut dummy_map_clone = (*dummy_map).clone();
             for i in 0..6 {
-                if dummy_map_clone[5-i][0] == 0 {
-                    dummy_map_clone[5-i][0] = match is_player_1_turn {
+                if dummy_map_clone[5-i][1] == 0 {
+                    dummy_map_clone[5-i][1] = match is_player_1_turn {
                         0 => {
                             84
                         },
@@ -186,8 +186,8 @@ pub fn canvasTOOTComputer() -> Html {
             game_map.set(game_map_clone);
             let mut dummy_map_clone = (*dummy_map).clone();
             for i in 0..6 {
-                if dummy_map_clone[5-i][0] == 0 {
-                    dummy_map_clone[5-i][0] = match is_player_1_turn {
+                if dummy_map_clone[5-i][2] == 0 {
+                    dummy_map_clone[5-i][2] = match is_player_1_turn {
                         0 => {
                             84
                         },
@@ -227,8 +227,8 @@ pub fn canvasTOOTComputer() -> Html {
             game_map.set(game_map_clone);
             let mut dummy_map_clone = (*dummy_map).clone();
             for i in 0..6 {
-                if dummy_map_clone[5-i][0] == 0 {
-                    dummy_map_clone[5-i][0] = match is_player_1_turn {
+                if dummy_map_clone[5-i][3] == 0 {
+                    dummy_map_clone[5-i][3] = match is_player_1_turn {
                         0 => {
                             84
                         },
@@ -268,8 +268,8 @@ pub fn canvasTOOTComputer() -> Html {
             game_map.set(game_map_clone);
             let mut dummy_map_clone = (*dummy_map).clone();
             for i in 0..6 {
-                if dummy_map_clone[5-i][0] == 0 {
-                    dummy_map_clone[5-i][0] = match is_player_1_turn {
+                if dummy_map_clone[5-i][4] == 0 {
+                    dummy_map_clone[5-i][4] = match is_player_1_turn {
                         0 => {
                             84
                         },
@@ -309,8 +309,8 @@ pub fn canvasTOOTComputer() -> Html {
             game_map.set(game_map_clone);
             let mut dummy_map_clone = (*dummy_map).clone();
             for i in 0..6 {
-                if dummy_map_clone[5-i][0] == 0 {
-                    dummy_map_clone[5-i][0] = match is_player_1_turn {
+                if dummy_map_clone[5-i][5] == 0 {
+                    dummy_map_clone[5-i][5] = match is_player_1_turn {
                         0 => {
                             84
                         },
@@ -350,8 +350,8 @@ pub fn canvasTOOTComputer() -> Html {
             game_map.set(game_map_clone);
             let mut dummy_map_clone = (*dummy_map).clone();
             for i in 0..6 {
-                if dummy_map_clone[5-i][0] == 0 {
-                    dummy_map_clone[5-i][0] = match is_player_1_turn {
+                if dummy_map_clone[5-i][6] == 0 {
+                    dummy_map_clone[5-i][6] = match is_player_1_turn {
                         0 => {
                             84
                         },
