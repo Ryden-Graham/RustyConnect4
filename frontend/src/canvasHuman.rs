@@ -83,11 +83,12 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
     // Complex state variables
     let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
     let canvas:UseStateHandle<Option<web_sys::HtmlCanvasElement>> = use_state(|| None);
-    let player_name = use_state(|| "".to_string());
     let display_state = use_state(|| "".to_string());
     let game_map = use_state(|| vec![vec![0; 7]; 6]);
     let player_name_1 = use_state(|| "".to_string());
     let player_name_2 = use_state(|| "".to_string());
+    let player_name_1_display = use_state(|| "".to_string());
+    let player_name_2_display = use_state(|| "".to_string());
     let pending_name_1 = use_state(|| "".to_string());
     let pending_name_2 = use_state(|| "".to_string());
     let current_turn = use_state(|| 0);
@@ -287,6 +288,8 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
         let pending_name_1 = pending_name_1.clone();
         let player_name_2 = player_name_2.clone();
         let pending_name_2 = pending_name_2.clone();
+        let player_name_1_display = player_name_1_display.clone();
+        let player_name_2_display = player_name_2_display.clone();
         Callback::from(move |_| {
             is_game_on.set(true);
             disabled.set(true);
@@ -304,6 +307,8 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
             // Lock in names
             player_name_1.set((*pending_name_1).clone().to_string());
             player_name_2.set((*pending_name_2).clone().to_string());
+            player_name_1_display.set((*pending_name_1).clone().to_string());
+            player_name_2_display.set((*pending_name_2).clone().to_string());
 
             is_canvas_drawn.set(true);
         })
@@ -540,8 +545,8 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
             if *is_game_on {
                 <div style={format!("display: {}", *display_state)}>
                     <br/>
-                    <h4>{format!("New Game: {} Vs Computer", *player_name)}</h4>
-                    <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
+                    <h4>{format!("New Game: {} Vs {}", (*player_name_1_display).clone(), (*player_name_2_display).clone())}</h4>
+                    <small>{format!("(Disc Colors: {} - ", (*player_name_1_display).clone())} <b>{"Red"}</b> {format!("   and    {} - ", (*player_name_2_display).clone())} <b>{"Yellow)"}</b></small>
                     <br/>
                 </div>
             }
