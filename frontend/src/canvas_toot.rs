@@ -62,6 +62,8 @@ pub fn canvasTOOTComputer() -> Html {
     let disabled = use_state(|| false);
     let game_won = use_state(|| false);
     let ai_move = use_state(|| false);
+    let colorblind_enabled = use_state(|| false);
+    let colorblind_enabled_display = use_state(|| false);
     
     // Complex state variables
     let canvas_context:UseStateHandle<Option<web_sys::CanvasRenderingContext2d>> = use_state(|| None);
@@ -71,9 +73,8 @@ pub fn canvasTOOTComputer() -> Html {
     let game_map = use_state(|| vec![vec![0; 7]; 6]);
     let dummy_map = use_state(|| vec![vec![0; 7]; 6]);
     let player_name_1 = use_state(|| "".to_string());
-    let player_name_2 = use_state(|| "".to_string());
+    let player_name_1_display = use_state(|| "".to_string());
     let pending_name_1 = use_state(|| "".to_string());
-    let pending_name_2 = use_state(|| "".to_string());
     let current_turn = use_state(|| 0);
     let difficulty = use_state(|| Difficulty::Hard);
 
@@ -96,6 +97,7 @@ pub fn canvasTOOTComputer() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
@@ -116,7 +118,6 @@ pub fn canvasTOOTComputer() -> Html {
             }
             dummy_map.set(dummy_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -137,6 +138,7 @@ pub fn canvasTOOTComputer() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
@@ -157,7 +159,6 @@ pub fn canvasTOOTComputer() -> Html {
             }
             dummy_map.set(dummy_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -178,6 +179,7 @@ pub fn canvasTOOTComputer() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
@@ -198,7 +200,6 @@ pub fn canvasTOOTComputer() -> Html {
             }
             dummy_map.set(dummy_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -219,6 +220,7 @@ pub fn canvasTOOTComputer() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
@@ -239,7 +241,6 @@ pub fn canvasTOOTComputer() -> Html {
             }
             dummy_map.set(dummy_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -260,6 +261,7 @@ pub fn canvasTOOTComputer() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
@@ -280,7 +282,6 @@ pub fn canvasTOOTComputer() -> Html {
             }
             dummy_map.set(dummy_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -301,6 +302,7 @@ pub fn canvasTOOTComputer() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
@@ -321,7 +323,6 @@ pub fn canvasTOOTComputer() -> Html {
             }
             dummy_map.set(dummy_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -342,6 +343,7 @@ pub fn canvasTOOTComputer() -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
@@ -362,7 +364,6 @@ pub fn canvasTOOTComputer() -> Html {
             }
             dummy_map.set(dummy_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -377,14 +378,12 @@ pub fn canvasTOOTComputer() -> Html {
         })
     };
 
-    let updatep2name = {
-        let pending_name_2 = pending_name_2.clone();
-        Callback::from(move |name_event: InputEvent| {
-            // DOM query from: https://stackoverflow.com/questions/71690906/how-to-query-and-update-the-dom-with-yew
-            let event: Event = name_event.dyn_into().unwrap_throw();
-            let input_elem: HtmlInputElement = event.target().unwrap_throw().dyn_into().unwrap_throw();
-            let value = input_elem.value();
-            pending_name_2.set(value);
+    let toggle_colorblind = {
+        let colorblind_enabled = colorblind_enabled.clone();
+        let colorblind_enabled_display = colorblind_enabled_display.clone();
+        Callback::from(move |_| {
+            colorblind_enabled.set(!(*colorblind_enabled));
+            colorblind_enabled_display.set(!(*colorblind_enabled));
         })
     };
 
@@ -412,9 +411,9 @@ pub fn canvasTOOTComputer() -> Html {
         let display_state = display_state.clone();
         let canvas_context = canvas_context.clone();
         let player_name_1 = player_name_1.clone();
+        let player_name_1_display = player_name_1_display.clone();
         let pending_name_1 = pending_name_1.clone();
-        let player_name_2 = player_name_2.clone();
-        let pending_name_2 = pending_name_2.clone();
+
         Callback::from(move |_| {
             is_game_on.set(true);
             disabled.set(true);
@@ -431,7 +430,7 @@ pub fn canvasTOOTComputer() -> Html {
 
             // Lock in names
             player_name_1.set((*pending_name_1).clone().to_string());
-            player_name_2.set((*pending_name_2).clone().to_string());
+            player_name_1_display.set((*pending_name_1).clone().to_string());
 
             is_canvas_drawn.set(true);
         })
@@ -640,8 +639,6 @@ pub fn canvasTOOTComputer() -> Html {
         
             let val = choice_val.0;
             let choice = choice_val.1;
-            // let paused = paused.clone();
-            // paused.set(false);
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
                 if game_map_clone[5-i][choice as usize] == 0 {
@@ -659,36 +656,23 @@ pub fn canvasTOOTComputer() -> Html {
             game_map.set(game_map_clone);
             ai_move.set(false);
             current_turn.set((*current_turn) + 1);
-            // let mut done = action(choice as usize, true);
-        
-            // if fail, then random
-            // while done < 0 {
-            //     // log::info!("Falling back to random agent");
-            //     let random_choice = get_random_val(7);
-            //     let reject_click = reject_click.clone();
-            //     done = action(random_choice, true);
-            // }
         };
 
         // Have a player win
         let win = |winner: i64| {
-            // let paused = paused.clone();
-            // paused.set(true);
             let game_won = game_won.clone();
             game_won.set(true);
-            // let reject_click = reject_click.clone();
-            // reject_click.set(false);
             let mut msg = String::new();
 
             let player_name_1 = player_name_1.clone();
-            let player_name_2 = player_name_2.clone();
+            let player_name_2 = "computer";
             let mut winner_num = 0;
             if winner > 0 {
                 msg = format!("{} wins", (*player_name_1).clone());
                 winner_num = 1;
             }
             else if winner < 0 {
-                msg = format!("{} wins", (*player_name_2).clone());
+                msg = format!("{} wins", player_name_2.clone());
                 winner_num = 2;
             }
             else {
@@ -696,7 +680,7 @@ pub fn canvasTOOTComputer() -> Html {
                 winner_num = 0;
             }
         
-            let print_msg = format!("{} - Click on game board to reset", msg);
+            let print_msg = format!("{}", msg);
             
             let canvas_context = canvas_context.clone();
             canvas_context.as_ref().unwrap().save();
@@ -711,7 +695,7 @@ pub fn canvasTOOTComputer() -> Html {
                 id: 0,
                 game_type_is_c4: true, 
                 player_1_name: (*player_name_1).clone().to_string(),
-                player_2_name: (*player_name_2).clone().to_string(),
+                player_2_name: player_name_2.clone().to_string(),
                 player_2_is_computer: false,
                 player1_won: winner_num,
                 date: utc
@@ -828,10 +812,24 @@ pub fn canvasTOOTComputer() -> Html {
                             "#ffffff"
                         },
                         1 => {
-                            "#ff4136"
+                            match (*colorblind_enabled).clone() {
+                                true => {
+                                    "#5D3A9B"
+                                },
+                                false => {
+                                    "#ff4136"
+                                }
+                            }
                         }
                         _ => {
-                            "#ffff00"
+                            match (*colorblind_enabled).clone() {
+                                true => {
+                                    "#E66100"
+                                },
+                                false => {
+                                    "#ffff00"
+                                }
+                            }
                         }
                     };
                     canvas_context.as_ref().unwrap().set_fill_style(&circle_color.into());
@@ -843,14 +841,14 @@ pub fn canvasTOOTComputer() -> Html {
                         2.0 * 3.14159265359,
                     );
                     canvas_context.as_ref().unwrap().fill();
-                    if circle_color == "#ff4136" {
+                    if circle_color == "#ff4136" || circle_color == "#5D3A9B" {
                         canvas_context.as_ref().unwrap().save();
                         canvas_context.as_ref().unwrap().set_font("bold 25px serif");
                         canvas_context.as_ref().unwrap().set_fill_style(&"#111".into());
                         canvas_context.as_ref().unwrap().fill_text("T", (75 * j + 100) as f64 - 8.5, (75 * i + 50) as f64 + 8.0);
                         canvas_context.as_ref().unwrap().restore();
                     }
-                    else if circle_color == "#ffff00" {
+                    else if circle_color == "#ffff00" || circle_color == "#E66100" {
                         canvas_context.as_ref().unwrap().save();
                         canvas_context.as_ref().unwrap().set_font("bold 25px serif");
                         canvas_context.as_ref().unwrap().set_fill_style(&"#111".into());
@@ -895,12 +893,35 @@ pub fn canvasTOOTComputer() -> Html {
                     <option value="medium">{"Medium"}</option>
                     <option value="hard">{"Hard"}</option>
                 </select>
+                <button
+                    class="button toggle-colorblind"
+                    type="button"
+                    onclick={toggle_colorblind}
+                >
+                {"Toggle Colorblind Mode"}
+                </button>
             </div>
             if *is_game_on {
                 <div style={format!("display: {}", *display_state)}>
                     <br/>
-                    <h4>{format!("New Game: {} Vs Computer", *player_name)}</h4>
-                    <small>{format!("(Disc Colors: {} - ", *player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
+                    <h4>{format!("New Game: {} Vs Computer", (*player_name_1_display).clone())}</h4>
+                    <small>{format!("(Disc Colors: {} - ", (*player_name_1_display).clone())} <b>{
+                        match (*colorblind_enabled_display).clone() {
+                        true => {
+                            "Purple"
+                        },
+                        false => {
+                            "Red"
+                        }
+                }}</b> {"   and    Computer - "} <b>{
+                    match (*colorblind_enabled_display).clone() {
+                        true => {
+                            "Orange"
+                        },
+                        false => {
+                            "Yellow"
+                        }
+                }}</b>{")"}</small>
                     <br/>
                 </div>
             }

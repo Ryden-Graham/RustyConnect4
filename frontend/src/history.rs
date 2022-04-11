@@ -101,83 +101,6 @@ pub fn history() -> Html {
             p2name.set(value);
         })
     };
-    
-    let send_data = {
-        let games_list = games_list.clone();
-        let utc: DateTime<Utc> = Utc::now();
-        Callback::from(move |_| {
-            let mut rng = rand::thread_rng();
-            let new_game = Game {
-                id: 0,
-                game_type_is_c4: rng.gen::<f32>() < 0.5, 
-                player_1_name: p1name.to_string(),
-                player_2_name: match p2name.clone().len() {
-                    0 => {
-                        "computer".to_string()
-                    },
-                    _ => {
-                        p2name.to_string()
-                    }
-                },
-                player_2_is_computer: p2name.len() == 0,
-                player1_won: match rng.gen::<f32>() < 0.3 {
-                    true => {
-                        1
-                    },
-                    false => {
-                        match rng.gen::<f32>() < 0.5 {
-                            true => {
-                                2
-                            },
-                            false => {
-                                0
-                            }
-                        }
-                    }
-                },
-                date: utc
-            };
-            
-            let games_list = games_list.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                reqwest::Client::new()
-                    .post("http://127.0.0.1:7000/client")
-                    .json(&new_game)
-                    .send()
-                    .await
-                    .unwrap()
-                    .text()
-                    .await.unwrap();
-
-                let fetched_data: Vec<Game> = reqwest::Client::new()
-                    .get("http://127.0.0.1:7000")
-                    .send()
-                    .await
-                    .unwrap()
-                    .json()
-                    .await
-                    .unwrap();
-                games_list.set(fetched_data);
-            });
-        })
-    };
-
-    let nuke = {
-        let games_list = games_list.clone();
-        Callback::from(move |_| {
-            wasm_bindgen_futures::spawn_local(async move {          
-                reqwest::Client::new()
-                    .post("http://127.0.0.1:7000/command")
-                    .body("nuke the world")
-                    .send()
-                    .await
-                    .unwrap()
-                    .text()
-                    .await.unwrap();
-            });
-            games_list.set(Vec::<Game>::new());
-        })
-    };
 
     html! {
         <div id="main" ng-controller="ScoreBoardCtrl">
@@ -186,20 +109,6 @@ pub fn history() -> Html {
                 <div class="main-header">
                     <b>{"Game History"}</b>
                 </div>
-                <button class="button start-game" onclick={send_data}>{ "Add Game!!!" }</button>
-                <input
-                    class="name-textbox"
-                    type="text"
-                    placeholder="Player1 name"
-                    oninput={updatep1name}
-                />
-                <input
-                    class="name-textbox"
-                    type="text"
-                    placeholder="Player2 name"
-                    oninput={updatep2name}
-                />
-                <button class="button start-game" onclick={nuke}>{ "NUKE DATABASE" }</button>
                 <hr class="header-divider"/>
                 
                 <div class="bottom-table">

@@ -526,8 +526,7 @@ pub fn canvasModel() -> Html {
         
             let val = choice_val.0;
             let choice = choice_val.1;
-            // let paused = paused.clone();
-            // paused.set(false);
+
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
                 if game_map_clone[5-i][choice as usize] == 0 {
