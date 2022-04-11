@@ -112,11 +112,11 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -135,11 +135,11 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -158,11 +158,11 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -181,11 +181,11 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -204,11 +204,11 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -227,11 +227,11 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -250,11 +250,11 @@ pub fn canvasHuman(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
-            current_turn.set((*current_turn) + 1);
         })
     };
 

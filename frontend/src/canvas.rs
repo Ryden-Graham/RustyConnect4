@@ -114,12 +114,12 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -139,12 +139,12 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -164,12 +164,12 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -189,12 +189,12 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -214,12 +214,12 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -239,12 +239,12 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
@@ -264,12 +264,12 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                             -1
                         }
                     };
+                    current_turn.set((*current_turn) + 1);
                     break;
                 }
             }
             game_map.set(game_map_clone);
             ai_move.set(true);
-            current_turn.set((*current_turn) + 1);
         })
     };
 
