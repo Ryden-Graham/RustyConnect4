@@ -13,6 +13,7 @@ pub mod canvas;
 pub mod canvasHuman;
 pub mod ScoreBoard;
 pub mod connect4Human;
+pub mod canvas_tootHuman;
 
 pub mod tootOttoComputer;
 pub mod tootOttoHuman;
