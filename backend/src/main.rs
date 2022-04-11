@@ -22,6 +22,7 @@ struct Game {
     date: DateTime<Utc>
 }
 
+// send database
 fn get_game_database() -> mongodb::sync::Collection<Game> {
     let mut client_options = ClientOptions::parse(
         "mongodb+srv://myUser:myPassword@mycluster.zvnqo.mongodb.net/MyCluster?retryWrites=true&w=majority",
@@ -38,9 +39,11 @@ fn get_game_database() -> mongodb::sync::Collection<Game> {
     database.collection::<Game>("games")
 }
 
+// used for the nuke (and possibly more) commands
+// add more ifs for more commands
 #[post("/command", data = "<command>")]
 fn get_command(command: String) -> String {
-    // uncomment this and run to nuke database
+    // nuke database
     if command == "nuke the world" {
         let collection = get_game_database();
         collection.delete_many(doc! { "player1_won": 2 }, None).unwrap();
@@ -50,11 +53,7 @@ fn get_command(command: String) -> String {
     command
 }
 
-// #[options("/nuke")]
-// fn confirm__options() {
-//     // we need this to accept options before the client posts
-// }
-
+// receive new game
 #[post("/client", format = "json", data = "<game>")]
 fn send_json(game: Json<Game>) -> Json<Game> {
     // println!("id: {}", game.id);
@@ -88,9 +87,6 @@ fn send_json(game: Json<Game>) -> Json<Game> {
 
     collection.insert_many(games, None).unwrap();
 
-    // uncomment this and run to nuke database
-    // collection.delete_many(doc! { "player1_won": false }, None).unwrap();
-    // collection.delete_many(doc! { "player1_won": true }, None).unwrap();
     game
 }
 
@@ -103,56 +99,22 @@ fn confirm_client_options() {
 fn index() -> Json<Vec<Game>> {
     let collection = get_game_database();
     println!("connected");
-    // standardize for testing for now REMOVE LATER
-    // collection.delete_many(doc! { "losses": 0 }, None).unwrap();
-    // let docs = vec![
-    //     User {
-    //         name: "Aaron".to_string(),
-    //         wins: 0,
-    //         losses: 0
-    //     },
-    //     User {
-    //         name: "Calvin".to_string(),
-    //         wins: 0,
-    //         losses: 0
-    //     },
-    //     User {
-    //         name: "Ryden".to_string(),
-    //         wins: 0,
-    //         losses: 0
-    //     }
-    // ];
-    // collection.insert_many(docs, None).unwrap();
 
     //****************** NOTE: PUT WHATEVER QUERY YOU WANT HERE ******************* */
+    // We just retrun everything to the client
     let cursor = collection.find(doc! { }, None).unwrap();
 
     let mut games = Vec::<Game>::new();
 
+    // debug print in backend console to show it's working
     for result in cursor {
         let game = result.unwrap();
         println!("id: {}", game.id);
-        // println!("type: {}", game.game_type_is_c4);
-        // println!("p1: {}", game.player_1_name);
-        // println!("p2: {}", game.player_2_name);
-        // println!("p2isCPU: {}", game.player_2_is_computer);
-        // println!("player1_won: {}", game.player1_won);
-        // println!("date: {}", game.date);
         games.push(game);
     }
 
     rocket::serde::json::Json(games)
 }
-
-// impl User {
-//     fn new(name: &str) -> User {
-//         User {
-//             name: name.to_string(),
-//             wins: 0,
-//             losses: 0
-//         }
-//     }
-// }
 
 pub struct CORS;
 
