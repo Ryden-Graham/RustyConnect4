@@ -602,13 +602,13 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
                 winner_num = 0;
             }
         
-            let print_msg = format!("{} - Click on game board to reset", msg);
+            let print_msg = format!("{}", msg);
             
             let canvas_context = canvas_context.clone();
             canvas_context.as_ref().unwrap().save();
             canvas_context.as_ref().unwrap().set_font("14pt sans-serif");
             canvas_context.as_ref().unwrap().set_fill_style(&"#111".into());
-            canvas_context.as_ref().unwrap().fill_text(&print_msg, 130.0, 20.0);
+            canvas_context.as_ref().unwrap().fill_text(&print_msg, 300.0, 20.0);
             canvas_context.as_ref().unwrap().restore();
         
             // send game to database
