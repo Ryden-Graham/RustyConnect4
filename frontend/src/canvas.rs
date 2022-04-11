@@ -78,7 +78,7 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
     let player_name_1 = use_state(|| "".to_string());
     let player_name_2 = use_state(|| "Computer".to_string());
     let current_turn = use_state(|| 0);
-    let difficulty = use_state(|| Difficulty::Easy);
+    let difficulty = use_state(|| Difficulty::Hard);
 
     let is_player_1_turn:usize = (*game_map).clone().iter().map(|column| column.iter().filter(|circle_number| **circle_number != 0).count()).sum::<usize>() % 2;
     
@@ -475,8 +475,8 @@ pub fn canvasModel(props: &CanvasProps) -> Html {
             // paused.set(false);
             let mut game_map_clone = (*game_map).clone();
             for i in 0..6 {
-                if game_map_clone[5-i][6] == 0 {
-                    game_map_clone[5-i][6] = match is_player_1_turn {
+                if game_map_clone[5-i][choice as usize] == 0 {
+                    game_map_clone[5-i][choice as usize] = match is_player_1_turn {
                         0 => {
                             1
                         },
